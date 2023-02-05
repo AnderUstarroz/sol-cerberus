@@ -3,18 +3,17 @@ import { Program } from "@project-serum/anchor";
 import { SolCerberus } from "../target/types/sol_cerberus";
 import { expect } from "chai";
 import { app_pda } from "./setup";
+import { APP_KEYPAIR, RECOVERY_KEYPAIR } from "./constants";
 
 describe("sol-cerberus", () => {
   const provider = anchor.AnchorProvider.env();
-  const recovery_keypair = anchor.web3.Keypair.generate();
   const unauthorized_keypair = anchor.web3.Keypair.generate();
-  const app_keypair = anchor.web3.Keypair.generate();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.SolCerberus as Program<SolCerberus>;
 
   it("Initialize App", async () => {
-    const [appPDA, _] = await app_pda(program, app_keypair.publicKey);
+    const appPDA = await app_pda(program, APP_KEYPAIR.publicKey);
     try {
       await program.account.app.fetch(appPDA);
     } catch (_err) {
@@ -22,22 +21,22 @@ describe("sol-cerberus", () => {
     }
     const tx = await program.methods
       .initializeApp({
-        id: app_keypair.publicKey,
-        recovery: recovery_keypair.publicKey,
+        id: APP_KEYPAIR.publicKey,
+        recovery: RECOVERY_KEYPAIR.publicKey,
       })
       .accounts({
         app: appPDA,
       })
       .rpc();
     let app = await program.account.app.fetch(appPDA);
-    expect(app.id.toBase58()).to.equal(app_keypair.publicKey.toBase58());
+    expect(app.id.toBase58()).to.equal(APP_KEYPAIR.publicKey.toBase58());
     expect(app.authority.toBase58()).to.equal(
       provider.wallet.publicKey.toBase58()
     );
   });
 
   it("Update authority", async () => {
-    const [appPDA, _] = await app_pda(program, app_keypair.publicKey);
+    const appPDA = await app_pda(program, APP_KEYPAIR.publicKey);
     try {
       // Unauthorized users shouldn't be able to update App authority
       await program.methods
@@ -72,9 +71,9 @@ describe("sol-cerberus", () => {
       .updateAuthority(provider.wallet.publicKey)
       .accounts({
         app: appPDA,
-        signer: recovery_keypair.publicKey,
+        signer: RECOVERY_KEYPAIR.publicKey,
       })
-      .signers([recovery_keypair])
+      .signers([RECOVERY_KEYPAIR])
       .rpc();
     app = await program.account.app.fetch(appPDA);
     expect(app.authority.toBase58()).to.equal(

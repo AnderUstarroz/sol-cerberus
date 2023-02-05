@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 
 // SPACE SIZE:
 // + 8 discriminator
-// + 32 app_id (Pubkey)
+// + 32 id (Pubkey)
 // + 32 authority (Pubkey)
 // + 1 bump
 // + 1 + 32 Option<backup> (Pubkey)
@@ -20,7 +20,7 @@ pub struct InitializeApp<'info> {
         seeds = [b"app".as_ref(), app_data.id.key().as_ref()], 
         bump
     )]
-    pub app: Account<'info, App>,
+    pub app: Box<Account<'info, App>>,
     pub system_program: Program<'info, System>,
 }
 
