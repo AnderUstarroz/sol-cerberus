@@ -4,12 +4,14 @@ use anchor_lang::prelude::*;
 pub struct AppData {
     pub id: Pubkey,
     pub recovery: Option<Pubkey>,
+    pub name: String,
 }
 
 #[account]
 pub struct App {
     pub id: Pubkey,
     pub authority: Pubkey,
-    pub bump: u8,
     pub recovery: Option<Pubkey>, // Only recovery or authority accounts can update the App Authority.
+    pub name: String,
+    pub bump: u8,
 }

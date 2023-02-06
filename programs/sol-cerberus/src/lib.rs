@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 use errors::*;
 use instructions::*;
 use state::*;
-use utils::*;
 
 pub mod errors;
 pub mod instructions;
@@ -30,6 +29,32 @@ pub mod sol_cerberus {
         permission: String,
     ) -> Result<()> {
         instructions::add_rule::add_rule(ctx, role, resource, permission)
+    }
+
+    pub fn delete_rule(
+        _ctx: Context<DeleteRule>,
+        _role: String,
+        _resource: String,
+        _permission: String,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    pub fn assign_role(
+        ctx: Context<AssignRole>,
+        role: String,
+        address: Pubkey,
+        address_type: AddressType,
+    ) -> Result<()> {
+        instructions::assign_role::assign_role(ctx, role, address, address_type)
+    }
+
+    pub fn delete_assigned_role(
+        _ctx: Context<DeleteAssignedRole>,
+        _role: String,
+        _address: String,
+    ) -> Result<()> {
+        Ok(())
     }
 }
 

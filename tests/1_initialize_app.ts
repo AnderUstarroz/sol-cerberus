@@ -5,14 +5,15 @@ import { expect } from "chai";
 import { app_pda } from "./setup";
 import { APP_KEYPAIR, RECOVERY_KEYPAIR } from "./constants";
 
-describe("sol-cerberus", () => {
+describe("1.- Initialize APP", () => {
   const provider = anchor.AnchorProvider.env();
   const unauthorized_keypair = anchor.web3.Keypair.generate();
+  const appName = "myapp";
   anchor.setProvider(provider);
 
   const program = anchor.workspace.SolCerberus as Program<SolCerberus>;
 
-  it("Initialize App", async () => {
+  it("Init", async () => {
     const appPDA = await app_pda(program, APP_KEYPAIR.publicKey);
     try {
       await program.account.app.fetch(appPDA);
@@ -23,6 +24,7 @@ describe("sol-cerberus", () => {
       .initializeApp({
         id: APP_KEYPAIR.publicKey,
         recovery: RECOVERY_KEYPAIR.publicKey,
+        name: appName,
       })
       .accounts({
         app: appPDA,
@@ -33,6 +35,7 @@ describe("sol-cerberus", () => {
     expect(app.authority.toBase58()).to.equal(
       provider.wallet.publicKey.toBase58()
     );
+    expect(app.name).to.equal(appName);
   });
 
   it("Update authority", async () => {
