@@ -15,7 +15,7 @@ use anchor_lang::prelude::*;
 // + 1 bump
 // total = 8 + 32 + 4 + 16 + 4 + 16 + 20 + 8 + 1 + 8 + 1 = 118
 #[derive(Accounts)]
-#[instruction(role: String, resource:String, permission:String)]
+#[instruction(rule_data:RuleData)]
 pub struct AddRule<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -29,8 +29,8 @@ pub struct AddRule<'info> {
         init,
         payer = authority,
         space = 118,
-        seeds = [role.as_ref(), resource.as_ref(), permission.as_ref(), app.id.key().as_ref()], 
-        constraint = valid_rules(&role, &resource, &permission)  @ Errors::InvalidRule,
+        seeds = [rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), app.id.key().as_ref()], 
+        constraint = valid_rules(&rule_data.role, &rule_data.resource, &rule_data.permission)  @ Errors::InvalidRule,
         bump
     )]
     pub rule: Account<'info, Rule>,
@@ -39,16 +39,15 @@ pub struct AddRule<'info> {
 
 pub fn add_rule(
     ctx: Context<AddRule>,
-    role: String,
-    resource: String,
-    permission: String,
+    rule_data:RuleData
 ) -> Result<()> {
     let rule = &mut ctx.accounts.rule;
     rule.bump = *ctx.bumps.get("rule").unwrap();
     rule.app_id = ctx.accounts.app.id;
-    rule.role = role;
-    rule.resource = resource;
-    rule.permission = permission;
+    rule.role = rule_data.role;
+    rule.resource = rule_data.resource;
+    rule.permission = rule_data.permission;
+    rule.expires_at = rule_data.expires_at;
     rule.created_at = utc_now();
     Ok(())
 }

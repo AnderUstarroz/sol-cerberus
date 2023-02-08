@@ -1,5 +1,5 @@
 use crate::state::app::App;
-use crate::state::assigned_role::*;
+use crate::state::role::*;
 use crate::utils::rules::*;
 use crate::Errors;
 use anchor_lang::prelude::*;
@@ -14,7 +14,7 @@ use anchor_lang::prelude::*;
 // + 1 bump
 // total = 8 + 32 + 32 + 20 + 1 + 1 + 1 + 8 + 1 = 104
 #[derive(Accounts)]
-#[instruction(role: String, address:Pubkey)]
+#[instruction(assign_role_data:AssignRoleData)]
 pub struct AssignRole<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -28,25 +28,23 @@ pub struct AssignRole<'info> {
         init,
         payer = authority,
         space = 104,
-        seeds = [role.as_ref(), address.key().as_ref()], 
-        constraint = valid_rule(false, &role)  @ Errors::InvalidRole,
+        seeds = [assign_role_data.role.as_ref(), assign_role_data.address.key().as_ref()], 
+        constraint = valid_rule(&assign_role_data.role, false)  @ Errors::InvalidRole,
         bump
     )]
-    pub assigned_role: Account<'info, AssignedRole>,
+    pub role: Account<'info, Role>,
     pub system_program: Program<'info, System>,
 }
 
 pub fn assign_role(
     ctx: Context<AssignRole>,
-    role: String,
-    address: Pubkey,
-    address_type: AddressType,
-) -> Result<()> {
-    let assigned_role = &mut ctx.accounts.assigned_role;
-    assigned_role.bump = *ctx.bumps.get("assigned_role").unwrap();
-    assigned_role.app_id = ctx.accounts.app.id;
-    assigned_role.address = address;
-    assigned_role.role = role;
-    assigned_role.address_type = address_type;
+    assign_role_data: AssignRoleData) -> Result<()> {
+    let role = &mut ctx.accounts.role;
+    role.bump = *ctx.bumps.get("role").unwrap();
+    role.app_id = ctx.accounts.app.id;
+    role.address = assign_role_data.address;
+    role.role = assign_role_data.role;
+    role.address_type = assign_role_data.address_type;
+    role.expires_at = assign_role_data.expires_at;
     Ok(())
 }

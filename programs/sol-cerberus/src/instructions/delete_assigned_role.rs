@@ -1,11 +1,8 @@
 use crate::state::app::App;
-use crate::state::assigned_role::AssignedRole;
-use crate::utils::rules::*;
-use crate::Errors;
+use crate::state::role::Role;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(role: String, address:Pubkey)]
 pub struct DeleteAssignedRole<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -17,13 +14,12 @@ pub struct DeleteAssignedRole<'info> {
     pub app: Account<'info, App>,
     #[account(
         mut,
-        close = destination,
-        seeds = [b"role".as_ref(), role.as_ref(), address.key().as_ref()], 
-        constraint = valid_rule(false, &role)  @ Errors::InvalidRole,
-        bump = assigned_role.bump,
+        close = collector,
+        seeds = [role.role.as_ref(), role.address.key().as_ref()], 
+        bump = role.bump,
     )]
-    pub assigned_role: Account<'info, AssignedRole>,
-    /// CHECK: Destination of the funds
+    pub role: Account<'info, Role>,
+    /// CHECK: collector of the funds
     #[account(mut)]
-    destination: AccountInfo<'info>,
+    collector: AccountInfo<'info>,
 }

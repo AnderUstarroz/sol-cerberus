@@ -1,4 +1,4 @@
-pub fn valid_rule(allow_wildcard: bool, text: &String) -> bool {
+pub fn valid_rule(text: &String, allow_wildcard: bool) -> bool {
     if text.is_empty() || text.as_bytes().len() > 16 {
         return false;
     }
@@ -16,11 +16,19 @@ pub fn valid_rule(allow_wildcard: bool, text: &String) -> bool {
 }
 pub fn valid_rules(role: &String, resource: &String, permission: &String) -> bool {
     for (index, item) in vec![role, resource, permission].iter().enumerate() {
-        if !valid_rule(index > 0, item) {
+        if !valid_rule(item, index > 0) {
             return false;
         }
     }
     true
+}
+
+pub fn allowed_rule(rule1: &String, rule2: &String) -> bool {
+    if rule1 == rule2 || rule2 == "*" {
+        return true;
+    }
+
+    false
 }
 
 #[cfg(test)]
@@ -61,5 +69,12 @@ mod tests {
             valid_rules(&"*".to_string(), &"B".to_string(), &"C".to_string()),
             false
         );
+    }
+
+    #[test]
+    fn test_allowed_rule() {
+        assert_eq!(allowed_rule(&"add".to_string(), &"add".to_string()), true);
+        assert_eq!(allowed_rule(&"add".to_string(), &"edit".to_string()), false);
+        assert_eq!(allowed_rule(&"add".to_string(), &"*".to_string()), true);
     }
 }

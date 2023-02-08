@@ -1,4 +1,4 @@
-use crate::state::app::*;
+use crate::{state::app::*, utils::validate_string_len};
 use anchor_lang::prelude::*;
 
 // SPACE SIZE:
@@ -30,7 +30,7 @@ pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<
     app.id = app_data.id;
     app.authority = ctx.accounts.authority.key();
     app.recovery = app_data.recovery;
-    app.name = app_data.name;
+    app.name = validate_string_len(&app_data.name, 0, 16)?;
     app.bump = *ctx.bumps.get("app").unwrap();
     Ok(())
 }

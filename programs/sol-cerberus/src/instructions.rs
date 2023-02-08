@@ -1,4 +1,5 @@
 pub use add_rule::*;
+pub use allowed::*;
 pub use assign_role::*;
 pub use delete_assigned_role::*;
 pub use delete_rule::*;
@@ -6,6 +7,7 @@ pub use initialize_app::*;
 pub use update_authority::*;
 
 pub mod add_rule;
+pub mod allowed;
 pub mod assign_role;
 pub mod delete_assigned_role;
 pub mod delete_rule;

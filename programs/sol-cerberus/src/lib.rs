@@ -22,39 +22,25 @@ pub mod sol_cerberus {
         instructions::update_authority::update_authority(ctx, new_authority)
     }
 
-    pub fn add_rule(
-        ctx: Context<AddRule>,
-        role: String,
-        resource: String,
-        permission: String,
-    ) -> Result<()> {
-        instructions::add_rule::add_rule(ctx, role, resource, permission)
+    pub fn add_rule(ctx: Context<AddRule>, rule_data: RuleData) -> Result<()> {
+        instructions::add_rule::add_rule(ctx, rule_data)
     }
 
-    pub fn delete_rule(
-        _ctx: Context<DeleteRule>,
-        _role: String,
-        _resource: String,
-        _permission: String,
-    ) -> Result<()> {
+    pub fn delete_rule(_ctx: Context<DeleteRule>) -> Result<()> {
         Ok(())
     }
 
-    pub fn assign_role(
-        ctx: Context<AssignRole>,
-        role: String,
-        address: Pubkey,
-        address_type: AddressType,
-    ) -> Result<()> {
-        instructions::assign_role::assign_role(ctx, role, address, address_type)
+    pub fn assign_role(ctx: Context<AssignRole>, assign_role_data: AssignRoleData) -> Result<()> {
+        instructions::assign_role::assign_role(ctx, assign_role_data)
     }
 
-    pub fn delete_assigned_role(
-        _ctx: Context<DeleteAssignedRole>,
-        _role: String,
-        _address: String,
-    ) -> Result<()> {
+    pub fn delete_assigned_role(_ctx: Context<DeleteAssignedRole>) -> Result<()> {
         Ok(())
+    }
+
+    // #[allow("resource1", "permission1")]
+    pub fn allowed(ctx: Context<Allowed>, allowed_data: AllowedData) -> Result<()> {
+        instructions::allowed::allowed(ctx, allowed_data)
     }
 }
 

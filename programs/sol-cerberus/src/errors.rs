@@ -12,4 +12,6 @@ pub enum Errors {
     StringTooShort,
     #[msg("The provided string is too long")]
     StringTooLong,
+    #[msg("The user does not have enough privileges to perform this action")]
+    Unauthorized,
 }

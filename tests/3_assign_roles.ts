@@ -1,44 +1,70 @@
-import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
-import { SolCerberus } from "../target/types/sol_cerberus";
+import { BN } from "bn.js";
 import { expect } from "chai";
-import { app_pda, rule_pda } from "./setup";
-import { APP_KEYPAIR } from "./constants";
+import { app_pda, role_pda, READ_PERM } from "./common";
+import { addressType, APP_KEYPAIR, NFTS, PROGRAM, USER } from "./constants";
 
 describe("3.- Assign roles", () => {
-  const provider = anchor.AnchorProvider.env();
-  const unauthorized_keypair = anchor.web3.Keypair.generate();
-  anchor.setProvider(provider);
+  let appPDA = null; // Populated on before() block
 
-  const program = anchor.workspace.SolCerberus as Program<SolCerberus>;
+  before(async () => {
+    appPDA = await app_pda();
+  });
+  it("Assign role to NFT", async () => {
+    const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
+    const oneHourLater = Math.floor(new Date().getTime() / 1000) + 60 * 60;
+    await PROGRAM.methods
+      .assignRole({
+        address: NFTS.allowedNFT.mintAddress,
+        role: READ_PERM.role,
+        addressType: addressType.NFT,
+        expiresAt: new BN(oneHourLater),
+      })
+      .accounts({
+        app: appPDA,
+        role: rolePDA,
+      })
+      .rpc();
+    const role = await PROGRAM.account.role.fetch(rolePDA);
+    expect(role.address.toBase58()).to.equal(
+      NFTS.allowedNFT.mintAddress.toBase58()
+    );
+    expect(role.role).to.equal(READ_PERM.role);
+    expect(role.addressType).to.deep.equal(addressType.NFT);
+    expect(role.expiresAt.toNumber()).to.equal(oneHourLater);
+  });
 
-  it("Delete rule", async () => {
-    // const role = "admin";
-    // const resource = "admin";
-    // const permission = "*";
-    // const appPDA = await app_pda(program, APP_KEYPAIR.publicKey);
-    // const rulePDA = await rule_pda(
-    //   program,
-    //   APP_KEYPAIR.publicKey,
-    //   role,
-    //   resource,
-    //   permission
-    // );
-    // await program.methods
-    //   .deleteRule(role, resource, permission)
-    //   .accounts({
-    //     app: appPDA,
-    //     rule: rulePDA,
-    //     destination: provider.wallet.publicKey,
-    //   })
-    //   .rpc();
-    // try {
-    //   await program.account.rule.fetch(rulePDA);
-    //   throw new Error("The rule should have been deleted at this point!");
-    // } catch (_err) {
-    //   expect(_err.toString()).to.include(
-    //     "Account does not exist or has no data"
-    //   );
-    // }
+  it("Assign role to NFT Collection", async () => {
+    const rolePDA = await role_pda(
+      READ_PERM.role,
+      NFTS.allowedCollection.nft.collection.address
+    );
+    await PROGRAM.methods
+      .assignRole({
+        address: NFTS.allowedCollection.nft.collection.address,
+        role: READ_PERM.role,
+        addressType: addressType.Collection,
+        expiresAt: null,
+      })
+      .accounts({
+        app: appPDA,
+        role: rolePDA,
+      })
+      .rpc();
+  });
+
+  it("Assign role to Wallet", async () => {
+    const rolePDA = await role_pda(READ_PERM.role, USER.publicKey);
+    await PROGRAM.methods
+      .assignRole({
+        address: USER.publicKey,
+        role: READ_PERM.role,
+        addressType: addressType.Wallet,
+        expiresAt: null,
+      })
+      .accounts({
+        app: appPDA,
+        role: rolePDA,
+      })
+      .rpc();
   });
 });
