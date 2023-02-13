@@ -7,7 +7,7 @@ import {
   READ_PERM,
   rule_pda,
 } from "./common";
-import { NFTS, PROGRAM, USER } from "./constants";
+import { NFTS, PROGRAM, PROGRAM_TEST_CPI, USER } from "./constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 describe("4.- Check permissions", () => {
@@ -22,6 +22,28 @@ describe("4.- Check permissions", () => {
       READ_PERM.permission
     );
   });
+  it("Check allowed Authority", async () => {
+    const metadataPDA = await nft_metadata_pda(NFTS.allowedNFT.mintAddress);
+    const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
+    const tokenAccountPDA = await getAssociatedTokenAddress(
+      NFTS.allowedNFT.mintAddress,
+      USER.publicKey
+    );
+    await PROGRAM.methods
+      .allowed({
+        resource: READ_PERM.resource,
+        permission: READ_PERM.permission,
+      })
+      .accounts({
+        solCerberusApp: appPDA,
+        solCerberusTokenAcc: null,
+        solCerberusMetadata: null,
+        solCerberusRule: rulePDA,
+        solCerberusRole: null,
+      })
+      .rpc();
+  });
+
   it("Check allowed NFT", async () => {
     const metadataPDA = await nft_metadata_pda(NFTS.allowedNFT.mintAddress);
     const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
@@ -35,10 +57,11 @@ describe("4.- Check permissions", () => {
         permission: READ_PERM.permission,
       })
       .accounts({
-        tokenAccount: tokenAccountPDA,
-        metadata: metadataPDA,
-        rule: rulePDA,
-        role: rolePDA,
+        solCerberusApp: appPDA,
+        solCerberusTokenAcc: tokenAccountPDA,
+        solCerberusMetadata: metadataPDA,
+        solCerberusRule: rulePDA,
+        solCerberusRole: rolePDA,
         signer: USER.publicKey,
       })
       .signers([USER])
@@ -63,10 +86,11 @@ describe("4.- Check permissions", () => {
         permission: READ_PERM.permission,
       })
       .accounts({
-        tokenAccount: tokenAccountPDA,
-        metadata: metadataPDA,
-        rule: rulePDA,
-        role: rolePDA,
+        solCerberusApp: appPDA,
+        solCerberusTokenAcc: tokenAccountPDA,
+        solCerberusMetadata: metadataPDA,
+        solCerberusRule: rulePDA,
+        solCerberusRole: rolePDA,
         signer: USER.publicKey,
       })
       .signers([USER])
@@ -81,13 +105,35 @@ describe("4.- Check permissions", () => {
         permission: READ_PERM.permission,
       })
       .accounts({
-        tokenAccount: null,
-        metadata: null,
-        rule: rulePDA,
-        role: rolePDA,
+        solCerberusApp: appPDA,
+        solCerberusRule: rulePDA,
+        solCerberusRole: rolePDA,
+        solCerberusTokenAcc: null,
+        solCerberusMetadata: null,
         signer: USER.publicKey,
       })
       .signers([USER])
       .rpc();
+  });
+
+  it("Borrame CPI", async () => {
+    const rolePDA = await role_pda(READ_PERM.role, USER.publicKey);
+    let result = await PROGRAM_TEST_CPI.methods
+      .testingCpi({
+        solCerverusResource: READ_PERM.resource,
+        solCerverusPermission: READ_PERM.permission,
+      })
+      .accounts({
+        signer: USER.publicKey,
+        solCerberusApp: appPDA,
+        solCerberusRule: rulePDA,
+        solCerberusRole: rolePDA,
+        solCerberusTokenAcc: null,
+        solCerberusMetadata: null,
+        solCerberus: PROGRAM.programId,
+      })
+      .signers([USER])
+      .rpc();
+    console.log("CPI Result:", result);
   });
 });

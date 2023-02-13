@@ -23,7 +23,7 @@ pub fn valid_rules(role: &String, resource: &String, permission: &String) -> boo
     true
 }
 
-pub fn allowed_rule(rule1: &String, rule2: &String) -> bool {
+pub fn allowed_perm(rule1: &String, rule2: &String) -> bool {
     if rule1 == rule2 || rule2 == "*" {
         return true;
     }
@@ -72,9 +72,9 @@ mod tests {
     }
 
     #[test]
-    fn test_allowed_rule() {
-        assert_eq!(allowed_rule(&"add".to_string(), &"add".to_string()), true);
-        assert_eq!(allowed_rule(&"add".to_string(), &"edit".to_string()), false);
-        assert_eq!(allowed_rule(&"add".to_string(), &"*".to_string()), true);
+    fn test_valid_permission() {
+        assert_eq!(allowed_perm(&"add".to_string(), &"add".to_string()), true);
+        assert_eq!(allowed_perm(&"add".to_string(), &"edit".to_string()), false);
+        assert_eq!(allowed_perm(&"add".to_string(), &"*".to_string()), true);
     }
 }

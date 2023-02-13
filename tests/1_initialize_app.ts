@@ -1,7 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
 import { expect } from "chai";
-import { app_pda, nft_metadata_pda, safe_airdrop } from "./common";
+import { app_pda, safe_airdrop } from "./common";
 import {
   APP_KEYPAIR,
   NFTS,
