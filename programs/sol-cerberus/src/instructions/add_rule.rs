@@ -7,13 +7,14 @@ use anchor_lang::prelude::*;
 // SPACE SIZE:
 // + 8 discriminator
 // + 32 app_id (Pubkey)
+// + 1 type (u8)
 // + 4 + 16 role (string)
 // + 4 + 16 resource (string)
 // + 20 permission (string)
 // + 8 created_at (i64)
 // + 1 + 8 expires_at Option<i64>
 // + 1 bump
-// total = 8 + 32 + 4 + 16 + 4 + 16 + 20 + 8 + 1 + 8 + 1 = 118
+// total = 8 + 32 + 1 + 4 + 16 + 4 + 16 + 20 + 8 + 1 + 8 + 1 = 119
 #[derive(Accounts)]
 #[instruction(rule_data:RuleData)]
 pub struct AddRule<'info> {
@@ -28,8 +29,8 @@ pub struct AddRule<'info> {
     #[account(
         init,
         payer = authority,
-        space = 118,
-        seeds = [rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), app.id.key().as_ref()], 
+        space = 119,
+        seeds = [[rule_data.namespace].as_ref(), rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), app.id.key().as_ref()], 
         constraint = valid_rules(&rule_data.role, &rule_data.resource, &rule_data.permission)  @ Errors::InvalidRule,
         bump
     )]

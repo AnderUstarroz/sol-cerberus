@@ -10,6 +10,7 @@ url = "https://api.apr.dev"
 [provider]
 cluster = "Localnet"
 wallet = "/Users/anderustarroz/.config/solana/id.json"
+env = { MY_ENV_VAR = "my_env_var_value" }
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

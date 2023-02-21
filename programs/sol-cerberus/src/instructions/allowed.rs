@@ -20,14 +20,14 @@ pub struct Allowed<'info> {
     )]
     pub sol_cerberus_app: Account<'info, App>,
     #[account(
-        seeds = [sol_cerberus_rule.role.as_ref(), sol_cerberus_rule.resource.as_ref(), sol_cerberus_rule.permission.as_ref(), sol_cerberus_rule.app_id.key().as_ref()], 
+        seeds = [[sol_cerberus_rule.namespace].as_ref(), sol_cerberus_rule.role.as_ref(), sol_cerberus_rule.resource.as_ref(), sol_cerberus_rule.permission.as_ref(), sol_cerberus_rule.app_id.key().as_ref()], 
         bump = sol_cerberus_rule.bump,
     )]
-    pub sol_cerberus_rule: Account<'info, Rule>,
+    pub sol_cerberus_rule: Option<Account<'info, Rule>>,
     #[account(
-        seeds = [sol_cerberus_role.role.as_ref(), sol_cerberus_role.address.key().as_ref()], 
+        seeds = [sol_cerberus_role.role.as_ref(), sol_cerberus_role.address.key().as_ref(), sol_cerberus_rule.as_ref().unwrap().app_id.key().as_ref()], 
         bump = sol_cerberus_role.bump,
-        constraint = sol_cerberus_role.role == sol_cerberus_rule.role @ Unauthorized, // Ensure Role assigned and Rule's Role are same.
+        constraint = sol_cerberus_role.role == sol_cerberus_rule.as_ref().unwrap().role @ Unauthorized, // Ensure Role assigned and Rule's Role are same.
     )]
     pub sol_cerberus_role: Option<Account<'info, Role>>,
     #[account(
@@ -54,16 +54,19 @@ pub fn allowed(ctx: Context<Allowed>, allowed_data:AllowedRule) -> Result<()> {
     let token_account = &ctx.accounts.sol_cerberus_token_acc;
     let metadata = &ctx.accounts.sol_cerberus_metadata;
     let rule = &ctx.accounts.sol_cerberus_rule;
+    let role = &ctx.accounts.sol_cerberus_role;
+
     // Authority is always allowed
     if &ctx.accounts.signer.key() == &ctx.accounts.sol_cerberus_app.authority.key(){
         return Ok(());
     }
-    // Role can only be empty when using Authority
-    if ctx.accounts.sol_cerberus_role.is_none(){
+    // Rule or Role can only be empty when using Authority
+    if rule.is_none() || role.is_none(){
         return Err(error!(Unauthorized))
     }
 
-    let role = &ctx.accounts.sol_cerberus_role.as_ref().unwrap();
+    let rule = rule.as_ref().unwrap();
+    let role = role.as_ref().unwrap();
 
     // Run permission check
     if !allowed_perm(&allowed_data.resource, &rule.resource) || !allowed_perm(&allowed_data.permission, &rule.permission){

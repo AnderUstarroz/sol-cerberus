@@ -15,7 +15,7 @@ pub struct DeleteAssignedRole<'info> {
     #[account(
         mut,
         close = collector,
-        seeds = [role.role.as_ref(), role.address.key().as_ref()], 
+        seeds = [role.role.as_ref(), role.address.key().as_ref(), app.id.key().as_ref()], 
         bump = role.bump,
     )]
     pub role: Account<'info, Role>,

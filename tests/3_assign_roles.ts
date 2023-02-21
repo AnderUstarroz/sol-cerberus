@@ -1,7 +1,13 @@
 import { BN } from "bn.js";
 import { expect } from "chai";
 import { app_pda, role_pda, READ_PERM } from "./common";
-import { addressType, APP_KEYPAIR, NFTS, PROGRAM, USER } from "./constants";
+import {
+  addressType,
+  APP_KEYPAIR,
+  NFTS,
+  PROGRAM,
+  USER_ALLOWED_WALLET,
+} from "./constants";
 
 describe("3.- Assign roles", () => {
   let appPDA = null; // Populated on before() block
@@ -53,10 +59,13 @@ describe("3.- Assign roles", () => {
   });
 
   it("Assign role to Wallet", async () => {
-    const rolePDA = await role_pda(READ_PERM.role, USER.publicKey);
+    const rolePDA = await role_pda(
+      READ_PERM.role,
+      USER_ALLOWED_WALLET.publicKey
+    );
     await PROGRAM.methods
       .assignRole({
-        address: USER.publicKey,
+        address: USER_ALLOWED_WALLET.publicKey,
         role: READ_PERM.role,
         addressType: addressType.Wallet,
         expiresAt: null,

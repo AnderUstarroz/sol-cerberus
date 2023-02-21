@@ -17,6 +17,7 @@ describe("2.- Rules", () => {
   it("Add rule", async () => {
     await PROGRAM.methods
       .addRule({
+        namespace: 0,
         role: role1,
         resource: resource1,
         permission: permission1,
@@ -43,6 +44,7 @@ describe("2.- Rules", () => {
     );
     await PROGRAM.methods
       .addRule({
+        namespace: 0,
         role: READ_PERM.role,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,

@@ -21,6 +21,7 @@ pub struct Role {
     pub address: Pubkey,
     pub role: String,
     pub address_type: AddressType,
+    pub created_at: i64,
     pub expires_at: Option<i64>,
     pub bump: u8,
 }

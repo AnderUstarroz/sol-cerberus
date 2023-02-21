@@ -38,12 +38,7 @@ pub mod sol_cerberus {
         Ok(())
     }
 
-    // Implement MACRO https://developerlife.com/2022/03/30/rust-proc-macro/#how-to-parse-args-containing-attributes-for-variant-1
-    // #[allow("resource1", "permission1")]
     pub fn allowed(ctx: Context<Allowed>, allowed_params: AllowedRule) -> Result<()> {
         instructions::allowed::allowed(ctx, allowed_params)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

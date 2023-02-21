@@ -1,6 +1,6 @@
 use crate::state::app::App;
 use crate::state::role::*;
-use crate::utils::rules::*;
+use crate::utils::{rules::*, utc_now};
 use crate::Errors;
 use anchor_lang::prelude::*;
 
@@ -10,9 +10,10 @@ use anchor_lang::prelude::*;
 // + 32 address (Pubkey)
 // + 20 role (string)
 // + 1 + 1 address_type
+// + 8 created_at (i64)
 // + 1 + 8 expires_at Option<i64>
 // + 1 bump
-// total = 8 + 32 + 32 + 20 + 1 + 1 + 1 + 8 + 1 = 104
+// total = 8 + 32 + 32 + 20 + 1 + 1 + 8 +  1 + 8 + 1 = 112
 #[derive(Accounts)]
 #[instruction(assign_role_data:AssignRoleData)]
 pub struct AssignRole<'info> {
@@ -27,8 +28,8 @@ pub struct AssignRole<'info> {
     #[account(
         init,
         payer = authority,
-        space = 104,
-        seeds = [assign_role_data.role.as_ref(), assign_role_data.address.key().as_ref()], 
+        space = 112,
+        seeds = [assign_role_data.role.as_ref(), assign_role_data.address.key().as_ref(), app.id.key().as_ref()], 
         constraint = valid_rule(&assign_role_data.role, false)  @ Errors::InvalidRole,
         bump
     )]
@@ -46,5 +47,6 @@ pub fn assign_role(
     role.role = assign_role_data.role;
     role.address_type = assign_role_data.address_type;
     role.expires_at = assign_role_data.expires_at;
+    role.created_at = utc_now();
     Ok(())
 }

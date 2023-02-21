@@ -7,7 +7,13 @@ import {
   READ_PERM,
   rule_pda,
 } from "./common";
-import { NFTS, PROGRAM, PROGRAM_TEST_CPI, USER } from "./constants";
+import {
+  NFTS,
+  PROGRAM,
+  PROGRAM_TEST_CPI,
+  USER_ALLOWED_WALLET,
+  USER_WITH_NFTS,
+} from "./constants";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 describe("4.- Check permissions", () => {
@@ -23,12 +29,6 @@ describe("4.- Check permissions", () => {
     );
   });
   it("Check allowed Authority", async () => {
-    const metadataPDA = await nft_metadata_pda(NFTS.allowedNFT.mintAddress);
-    const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
-    const tokenAccountPDA = await getAssociatedTokenAddress(
-      NFTS.allowedNFT.mintAddress,
-      USER.publicKey
-    );
     await PROGRAM.methods
       .allowed({
         resource: READ_PERM.resource,
@@ -49,7 +49,7 @@ describe("4.- Check permissions", () => {
     const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
     const tokenAccountPDA = await getAssociatedTokenAddress(
       NFTS.allowedNFT.mintAddress,
-      USER.publicKey
+      USER_WITH_NFTS.publicKey
     );
     await PROGRAM.methods
       .allowed({
@@ -62,9 +62,9 @@ describe("4.- Check permissions", () => {
         solCerberusMetadata: metadataPDA,
         solCerberusRule: rulePDA,
         solCerberusRole: rolePDA,
-        signer: USER.publicKey,
+        signer: USER_WITH_NFTS.publicKey,
       })
-      .signers([USER])
+      .signers([USER_WITH_NFTS])
       .rpc();
   });
 
@@ -78,7 +78,7 @@ describe("4.- Check permissions", () => {
     );
     const tokenAccountPDA = await getAssociatedTokenAddress(
       NFTS.allowedCollection.mintAddress,
-      USER.publicKey
+      USER_WITH_NFTS.publicKey
     );
     await PROGRAM.methods
       .allowed({
@@ -91,14 +91,17 @@ describe("4.- Check permissions", () => {
         solCerberusMetadata: metadataPDA,
         solCerberusRule: rulePDA,
         solCerberusRole: rolePDA,
-        signer: USER.publicKey,
+        signer: USER_WITH_NFTS.publicKey,
       })
-      .signers([USER])
+      .signers([USER_WITH_NFTS])
       .rpc();
   });
 
   it("Check allowed wallet", async () => {
-    const rolePDA = await role_pda(READ_PERM.role, USER.publicKey);
+    const rolePDA = await role_pda(
+      READ_PERM.role,
+      USER_ALLOWED_WALLET.publicKey
+    );
     await PROGRAM.methods
       .allowed({
         resource: READ_PERM.resource,
@@ -110,30 +113,32 @@ describe("4.- Check permissions", () => {
         solCerberusRole: rolePDA,
         solCerberusTokenAcc: null,
         solCerberusMetadata: null,
-        signer: USER.publicKey,
+        signer: USER_ALLOWED_WALLET.publicKey,
       })
-      .signers([USER])
+      .signers([USER_ALLOWED_WALLET])
       .rpc();
   });
 
   it("Borrame CPI", async () => {
-    const rolePDA = await role_pda(READ_PERM.role, USER.publicKey);
-    let result = await PROGRAM_TEST_CPI.methods
-      .testingCpi({
-        solCerverusResource: READ_PERM.resource,
-        solCerverusPermission: READ_PERM.permission,
-      })
+    const metadataPDA = await nft_metadata_pda(NFTS.allowedNFT.mintAddress);
+    const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
+    const tokenAccountPDA = await getAssociatedTokenAddress(
+      NFTS.allowedNFT.mintAddress,
+      USER_WITH_NFTS.publicKey
+    );
+
+    await PROGRAM_TEST_CPI.methods
+      .testingCpi()
       .accounts({
-        signer: USER.publicKey,
+        signer: USER_WITH_NFTS.publicKey,
         solCerberusApp: appPDA,
         solCerberusRule: rulePDA,
         solCerberusRole: rolePDA,
-        solCerberusTokenAcc: null,
-        solCerberusMetadata: null,
+        solCerberusTokenAcc: tokenAccountPDA,
+        solCerberusMetadata: metadataPDA,
         solCerberus: PROGRAM.programId,
       })
-      .signers([USER])
+      .signers([USER_WITH_NFTS])
       .rpc();
-    console.log("CPI Result:", result);
   });
 });

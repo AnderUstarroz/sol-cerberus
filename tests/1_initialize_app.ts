@@ -8,8 +8,8 @@ import {
   RECOVERY_KEYPAIR,
   METAPLEX,
   PROGRAM,
-  USER,
   PROVIDER_WALLET,
+  USER_WITH_NFTS,
 } from "./constants";
 
 describe("1.- Initialize APP", () => {
@@ -35,14 +35,14 @@ describe("1.- Initialize APP", () => {
       name: "Allowed NFT",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft1-hash",
-      tokenOwner: USER.publicKey,
+      tokenOwner: USER_WITH_NFTS.publicKey,
       isMutable: true,
     });
     NFTS["allowedCollection"] = await METAPLEX.nfts().create({
       name: "Allowed collection",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft2-hash",
-      tokenOwner: USER.publicKey,
+      tokenOwner: USER_WITH_NFTS.publicKey,
       isMutable: true,
       collection: collection.mintAddress,
       collectionAuthority: PROVIDER_WALLET.payer, // This will set the Collection verified flag to true
@@ -51,7 +51,7 @@ describe("1.- Initialize APP", () => {
       name: "Not allowed NFT",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft3-hash",
-      tokenOwner: USER.publicKey,
+      tokenOwner: USER_WITH_NFTS.publicKey,
       isMutable: true,
     });
   });

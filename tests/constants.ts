@@ -14,7 +14,10 @@ export const PROVIDER_WALLET = (PROGRAM.provider as anchor.AnchorProvider)
 export const METAPLEX = new Metaplex(PROGRAM.provider.connection).use(
   keypairIdentity(PROVIDER_WALLET.payer)
 );
-export const USER = anchor.web3.Keypair.generate();
+export const USER_ALLOWED_WALLET: anchor.web3.Keypair =
+  anchor.web3.Keypair.generate();
+export const USER_WITH_NFTS: anchor.web3.Keypair =
+  anchor.web3.Keypair.generate();
 export const APP_KEYPAIR = anchor.web3.Keypair.generate();
 export const RECOVERY_KEYPAIR = anchor.web3.Keypair.generate();
 export const METADATA_PROGRAM_ID = new anchor.web3.PublicKey(

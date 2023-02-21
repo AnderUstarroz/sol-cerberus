@@ -1,6 +1,11 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { APP_KEYPAIR, METADATA_PROGRAM_ID, PROGRAM } from "./constants";
+import {
+  APP_KEYPAIR,
+  METADATA_PROGRAM_ID,
+  PROGRAM,
+  PROVIDER,
+} from "./constants";
 
 export async function app_pda() {
   return (
@@ -11,10 +16,16 @@ export async function app_pda() {
   )[0];
 }
 
-export async function rule_pda(role, resource, permission) {
+export async function rule_pda(
+  role,
+  resource,
+  permission,
+  namespace: number = 0
+) {
   return (
     await PublicKey.findProgramAddressSync(
       [
+        new Uint8Array([namespace]),
         anchor.utils.bytes.utf8.encode(role),
         anchor.utils.bytes.utf8.encode(resource),
         anchor.utils.bytes.utf8.encode(permission),
@@ -28,7 +39,11 @@ export async function rule_pda(role, resource, permission) {
 export async function role_pda(role, address: PublicKey) {
   return (
     await PublicKey.findProgramAddressSync(
-      [anchor.utils.bytes.utf8.encode(role), address.toBuffer()],
+      [
+        anchor.utils.bytes.utf8.encode(role),
+        address.toBuffer(),
+        APP_KEYPAIR.publicKey.toBuffer(),
+      ],
       PROGRAM.programId
     )
   )[0];
@@ -75,5 +90,17 @@ export async function safe_airdrop(
 export const READ_PERM = {
   role: "Authenticated",
   resource: "Homepage",
-  permission: "Read",
+  permission: "Write",
 };
+
+export async function tx_size(
+  tx: anchor.web3.Transaction,
+  signer: anchor.web3.Keypair
+) {
+  tx.feePayer = signer.publicKey;
+  tx.recentBlockhash = (
+    await PROVIDER.connection.getLatestBlockhash()
+  ).blockhash;
+  tx.sign(signer);
+  return `Transaction size: ${tx.serialize().length} bytes`;
+}

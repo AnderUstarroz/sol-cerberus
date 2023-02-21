@@ -1,8 +1,16 @@
 [package]
 name = "sol-cerberus"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "A fine grained permission system for Solana"
 edition = "2021"
+authors = ["Ander", "Micael"]
+homepage = "https://solcerberus.com/"
+repository = "https://github.com/AnderUstarroz/sol-cerberus"
+documentation = "https://solcerberus.com/docs"
+readme = "README.md"
+keywords = ["solana", "acl"]
+categories = ["solana-access-control-list"]
+
 
 [lib]
 crate-type = ["cdylib", "lib"]
