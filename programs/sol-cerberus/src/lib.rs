@@ -8,7 +8,7 @@ pub mod instructions;
 pub mod state;
 pub mod utils;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("SCERbrcgSPwgkrJ7j4TABr17dhYzdgiwPZUSSfFPt8x");
 
 #[program]
 pub mod sol_cerberus {

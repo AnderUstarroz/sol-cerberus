@@ -31,13 +31,13 @@ pub struct Allowed<'info> {
     )]
     pub sol_cerberus_role: Option<Account<'info, Role>>,
     #[account(
-        constraint = sol_cerberus_token_acc.mint == sol_cerberus_metadata.as_ref().unwrap().mint @ Unauthorized, // Ensure Metadata and NFT accounts belongs to the same token.
         constraint = sol_cerberus_token_acc.owner == signer.key() @ Unauthorized // Ensure NFT owner is the signer.
     )]
     pub sol_cerberus_token_acc: Option<Account<'info, TokenAccount>>,
     #[account(
         seeds = [b"metadata", MPL_TOKEN_METADATA_ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
         seeds::program = mpl_token_metadata::ID,
+        constraint = sol_cerberus_metadata.mint == sol_cerberus_token_acc.as_ref().unwrap().mint @ Unauthorized, // Ensure Metadata and NFT accounts belongs to the same token.
         bump,
     )]
     pub sol_cerberus_metadata: Option<Account<'info, MetadataAccount>>,

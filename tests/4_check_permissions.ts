@@ -1,5 +1,3 @@
-import { BN } from "bn.js";
-import { expect } from "chai";
 import {
   app_pda,
   role_pda,
@@ -10,7 +8,6 @@ import {
 import {
   NFTS,
   PROGRAM,
-  PROGRAM_TEST_CPI,
   USER_ALLOWED_WALLET,
   USER_WITH_NFTS,
 } from "./constants";
@@ -116,29 +113,6 @@ describe("4.- Check permissions", () => {
         signer: USER_ALLOWED_WALLET.publicKey,
       })
       .signers([USER_ALLOWED_WALLET])
-      .rpc();
-  });
-
-  it("Borrame CPI", async () => {
-    const metadataPDA = await nft_metadata_pda(NFTS.allowedNFT.mintAddress);
-    const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
-    const tokenAccountPDA = await getAssociatedTokenAddress(
-      NFTS.allowedNFT.mintAddress,
-      USER_WITH_NFTS.publicKey
-    );
-
-    await PROGRAM_TEST_CPI.methods
-      .testingCpi()
-      .accounts({
-        signer: USER_WITH_NFTS.publicKey,
-        solCerberusApp: appPDA,
-        solCerberusRule: rulePDA,
-        solCerberusRole: rolePDA,
-        solCerberusTokenAcc: tokenAccountPDA,
-        solCerberusMetadata: metadataPDA,
-        solCerberus: PROGRAM.programId,
-      })
-      .signers([USER_WITH_NFTS])
       .rpc();
   });
 });
