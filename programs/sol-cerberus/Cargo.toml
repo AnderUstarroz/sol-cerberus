@@ -1,7 +1,7 @@
 [package]
 name = "sol-cerberus"
 version = "0.1.0"
-description = "A fine grained permission system for Solana"
+description = "A fine grained Access Control List (ACL) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
 homepage = "https://solcerberus.com/"
@@ -9,7 +9,8 @@ repository = "https://github.com/AnderUstarroz/sol-cerberus"
 documentation = "https://solcerberus.com/docs"
 readme = "README.md"
 keywords = ["solana", "acl"]
-categories = ["solana-access-control-list"]
+categories = ["authentication"]
+license = "GPL-3.0-or-later"
 
 
 [lib]

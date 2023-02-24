@@ -7,7 +7,7 @@ use crate::state::rule::Rule;
 use crate::utils::{allowed_perm, utc_now};
 use crate::state::role::Role;
 use anchor_lang::prelude::*;
-use crate::Errors::Unauthorized;
+use crate::Errors::{Unauthorized, InvalidAppID};
 
 
 #[derive(Accounts)]
@@ -45,19 +45,24 @@ pub struct Allowed<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug)]
 pub struct AllowedRule {
+    pub app_id: Pubkey,
     pub resource: String,
     pub permission: String,
 }
 
 
 pub fn allowed(ctx: Context<Allowed>, allowed_data:AllowedRule) -> Result<()> {
+    let app = &ctx.accounts.sol_cerberus_app;
     let token_account = &ctx.accounts.sol_cerberus_token_acc;
     let metadata = &ctx.accounts.sol_cerberus_metadata;
     let rule = &ctx.accounts.sol_cerberus_rule;
     let role = &ctx.accounts.sol_cerberus_role;
 
+    if allowed_data.app_id != app.id.key(){
+        return Err(error!(InvalidAppID))
+    }
     // Authority is always allowed
-    if &ctx.accounts.signer.key() == &ctx.accounts.sol_cerberus_app.authority.key(){
+    if &ctx.accounts.signer.key() == &app.authority.key(){
         return Ok(());
     }
     // Rule or Role can only be empty when using Authority

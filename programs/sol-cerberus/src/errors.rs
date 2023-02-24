@@ -14,4 +14,8 @@ pub enum Errors {
     StringTooLong,
     #[msg("The user does not have enough privileges to perform this action")]
     Unauthorized,
+    #[msg("The Sol Cerberus APP ID does not match the one defined in the program")]
+    InvalidAppID,
+    #[msg("SOL_CERBERUS_APP_ID is missing on lib.rs")]
+    SolCerberusAppIdMissing,
 }

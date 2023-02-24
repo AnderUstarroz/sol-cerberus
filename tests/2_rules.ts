@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { app_pda, READ_PERM, rule_pda } from "./common";
-import { APP_KEYPAIR, PROGRAM, PROVIDER } from "./constants";
+import { APP_ID, PROGRAM, PROVIDER } from "./constants";
 
 describe("2.- Rules", () => {
   let appPDA = null; // Populated on before() block
@@ -29,7 +29,7 @@ describe("2.- Rules", () => {
       })
       .rpc();
     let rule = await PROGRAM.account.rule.fetch(rule1PDA);
-    expect(rule.appId.toBase58()).to.equal(APP_KEYPAIR.publicKey.toBase58());
+    expect(rule.appId.toBase58()).to.equal(APP_ID.toBase58());
     expect(rule.role).to.equal(role1);
     expect(rule.resource).to.equal(resource1);
     expect(rule.permission).to.equal(permission1);

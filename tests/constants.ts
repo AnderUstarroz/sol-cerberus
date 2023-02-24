@@ -6,8 +6,6 @@ import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 
 export const PROGRAM = anchor.workspace
   .SolCerberus as anchor.Program<SolCerberus>;
-// export const PROGRAM_TEST_CPI = anchor.workspace
-//   .TestCpi as anchor.Program<TestCpi>;
 export const PROVIDER = anchor.AnchorProvider.env();
 export const PROVIDER_WALLET = (PROGRAM.provider as anchor.AnchorProvider)
   .wallet as NodeWallet;
@@ -18,7 +16,9 @@ export const USER_ALLOWED_WALLET: anchor.web3.Keypair =
   anchor.web3.Keypair.generate();
 export const USER_WITH_NFTS: anchor.web3.Keypair =
   anchor.web3.Keypair.generate();
-export const APP_KEYPAIR = anchor.web3.Keypair.generate();
+export const APP_ID = new anchor.web3.PublicKey(
+  "k39mmqs9rEJ6BMvSF84yw91qnRBXKEBJbeQnZVX7NC3"
+);
 export const RECOVERY_KEYPAIR = anchor.web3.Keypair.generate();
 export const METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

@@ -1,15 +1,14 @@
 # sol-cerberus
-Access Control List (ACL) for managing the admission rules on Solana programs
+A fine grained Access Control List (ACL) for enhanced security on Solana programs.
 
+## Development
 
-## Requirements
+### Requirements
 - [Install Rust](https://www.rust-lang.org/tools/install).
 - [Install Yarn](https://yarnpkg.com/getting-started/install).
 - [Install Solana CLI](https://docs.solana.com/es/cli/install-solana-cli-tools).
 - [Install Anchor](https://book.anchor-lang.com/getting_started/installation.html#anchor).
 - [Install Node v16.19.0](https://www.npmjs.com/package/n).
-
-## Development
 
 
 ### Build/update Solana dependencies

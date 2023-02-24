@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { expect } from "chai";
 import { app_pda, safe_airdrop } from "./common";
 import {
-  APP_KEYPAIR,
+  APP_ID,
   NFTS,
   PROVIDER,
   RECOVERY_KEYPAIR,
@@ -65,7 +65,7 @@ describe("1.- Initialize APP", () => {
     }
     const tx = await PROGRAM.methods
       .initializeApp({
-        id: APP_KEYPAIR.publicKey,
+        id: APP_ID,
         recovery: RECOVERY_KEYPAIR.publicKey,
         name: appName,
       })
@@ -74,7 +74,7 @@ describe("1.- Initialize APP", () => {
       })
       .rpc();
     let app = await PROGRAM.account.app.fetch(appPDA);
-    expect(app.id.toBase58()).to.equal(APP_KEYPAIR.publicKey.toBase58());
+    expect(app.id.toBase58()).to.equal(APP_ID.toBase58());
     expect(app.authority.toBase58()).to.equal(
       PROVIDER.wallet.publicKey.toBase58()
     );

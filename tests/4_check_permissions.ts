@@ -6,6 +6,7 @@ import {
   rule_pda,
 } from "./common";
 import {
+  APP_ID,
   NFTS,
   PROGRAM,
   USER_ALLOWED_WALLET,
@@ -28,6 +29,7 @@ describe("4.- Check permissions", () => {
   it("Check allowed Authority", async () => {
     await PROGRAM.methods
       .allowed({
+        appId: APP_ID,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,
       })
@@ -50,6 +52,7 @@ describe("4.- Check permissions", () => {
     );
     await PROGRAM.methods
       .allowed({
+        appId: APP_ID,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,
       })
@@ -79,6 +82,7 @@ describe("4.- Check permissions", () => {
     );
     await PROGRAM.methods
       .allowed({
+        appId: APP_ID,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,
       })
@@ -101,6 +105,7 @@ describe("4.- Check permissions", () => {
     );
     await PROGRAM.methods
       .allowed({
+        appId: APP_ID,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,
       })

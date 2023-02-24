@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { app_pda, role_pda, READ_PERM } from "./common";
 import {
   addressType,
-  APP_KEYPAIR,
+  APP_ID,
   NFTS,
   PROGRAM,
   USER_ALLOWED_WALLET,
