@@ -2,6 +2,7 @@ use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 use mpl_token_metadata::{
     ID as MPL_TOKEN_METADATA_ID,
 };
+use solana_program::pubkey;
 use crate::state::App;
 use crate::state::rule::Rule;
 use crate::utils::{allowed_perm, utc_now};
@@ -9,6 +10,8 @@ use crate::state::role::Role;
 use anchor_lang::prelude::*;
 use crate::Errors::{Unauthorized, InvalidAppID};
 
+
+const TEST_APP_ID: Pubkey = pubkey!("testX83crd4vAgRrvmwXgVQ2r69uCpg8xzh8A5X124x");
 
 #[derive(Accounts)]
 pub struct Allowed<'info> {
@@ -20,7 +23,7 @@ pub struct Allowed<'info> {
     )]
     pub sol_cerberus_app: Account<'info, App>,
     #[account(
-        seeds = [[sol_cerberus_rule.namespace].as_ref(), sol_cerberus_rule.role.as_ref(), sol_cerberus_rule.resource.as_ref(), sol_cerberus_rule.permission.as_ref(), sol_cerberus_rule.app_id.key().as_ref()], 
+        seeds = [sol_cerberus_rule.namespace.to_le_bytes().as_ref(), sol_cerberus_rule.role.as_ref(), sol_cerberus_rule.resource.as_ref(), sol_cerberus_rule.permission.as_ref(), sol_cerberus_rule.app_id.key().as_ref()], 
         bump = sol_cerberus_rule.bump,
     )]
     pub sol_cerberus_rule: Option<Account<'info, Rule>>,
@@ -58,8 +61,12 @@ pub fn allowed(ctx: Context<Allowed>, allowed_data:AllowedRule) -> Result<()> {
     let rule = &ctx.accounts.sol_cerberus_rule;
     let role = &ctx.accounts.sol_cerberus_role;
 
+    // The APP ID must be the one authorized by the program
     if allowed_data.app_id != app.id.key(){
-        return Err(error!(InvalidAppID))
+        // Ignore APP Check on Test APP
+        if allowed_data.app_id != TEST_APP_ID{
+            return Err(error!(InvalidAppID))
+        }
     }
     // Authority is always allowed
     if &ctx.accounts.signer.key() == &app.authority.key(){

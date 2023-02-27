@@ -1846,16 +1846,17 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
 name = "sol-cerberus"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
  "mpl-token-metadata",
+ "solana-program",
 ]
 
 [[package]]
 name = "sol-cerberus-macros"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2181,6 +2182,7 @@ dependencies = [
  "mpl-token-metadata",
  "sol-cerberus",
  "sol-cerberus-macros",
+ "solana-program",
 ]
 
 [[package]]

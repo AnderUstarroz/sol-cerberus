@@ -15,7 +15,7 @@ pub struct DeleteRule<'info> {
     #[account(
         mut,
         close = collector,
-        seeds = [[rule.namespace].as_ref(), rule.role.as_ref(), rule.resource.as_ref(), rule.permission.as_ref(), app.id.key().as_ref()], 
+        seeds = [rule.namespace.to_le_bytes().as_ref(), rule.role.as_ref(), rule.resource.as_ref(), rule.permission.as_ref(), app.id.key().as_ref()], 
         bump = rule.bump,
     )]
     pub rule: Account<'info, Rule>,

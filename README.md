@@ -25,4 +25,3 @@ To run the tests execute the following command at the root folder of the project
 ```
 anchor test
 ```
-

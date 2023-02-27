@@ -1,6 +1,6 @@
 [package]
 name = "sol-cerberus"
-version = "0.1.0"
+version = "0.1.1"
 description = "A fine grained Access Control List (ACL) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
@@ -27,4 +27,5 @@ default = []
 [dependencies]
 anchor-lang = "0.26.0"
 anchor-spl = { version = "0.26.0", features = ["metadata"] }
+solana-program = "1.13.5"
 mpl-token-metadata = { version = "1.8.3", features = ["no-entrypoint"] }

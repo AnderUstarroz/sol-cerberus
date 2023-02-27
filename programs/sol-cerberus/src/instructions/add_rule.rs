@@ -30,7 +30,7 @@ pub struct AddRule<'info> {
         init,
         payer = authority,
         space = 119,
-        seeds = [[rule_data.namespace].as_ref(), rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), app.id.key().as_ref()], 
+        seeds = [rule_data.namespace.to_le_bytes().as_ref(), rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), app.id.key().as_ref()], 
         constraint = valid_rules(&rule_data.role, &rule_data.resource, &rule_data.permission)  @ Errors::InvalidRule,
         bump
     )]
