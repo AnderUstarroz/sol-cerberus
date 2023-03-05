@@ -50,5 +50,9 @@ pub fn add_rule(
     rule.permission = rule_data.permission;
     rule.expires_at = rule_data.expires_at;
     rule.created_at = utc_now();
+    emit!(RulesChanged {
+        time: rule.created_at,
+        app_id: ctx.accounts.app.id,
+    });
     Ok(())
 }

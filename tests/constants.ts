@@ -1,11 +1,11 @@
 import * as anchor from "@project-serum/anchor";
-import { SolCerberus } from "../target/types/sol_cerberus";
+import { SolCerberus as SolCerberusTypes } from "../target/types/sol_cerberus";
 // import { TestCpi } from "../target/types/test_cpi";
 import { keypairIdentity, Metaplex } from "@metaplex-foundation/js";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 
 export const PROGRAM = anchor.workspace
-  .SolCerberus as anchor.Program<SolCerberus>;
+  .SolCerberus as anchor.Program<SolCerberusTypes>;
 export const PROVIDER = anchor.AnchorProvider.env();
 export const PROVIDER_WALLET = (PROGRAM.provider as anchor.AnchorProvider)
   .wallet as NodeWallet;

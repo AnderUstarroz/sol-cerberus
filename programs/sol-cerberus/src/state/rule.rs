@@ -25,3 +25,10 @@ pub struct Rule {
     pub expires_at: Option<i64>,
     pub bump: u8,
 }
+
+#[event]
+pub struct RulesChanged {
+    pub time: i64,
+    #[index]
+    pub app_id: Pubkey,
+}

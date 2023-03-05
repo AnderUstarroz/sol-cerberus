@@ -25,3 +25,10 @@ pub struct Role {
     pub expires_at: Option<i64>,
     pub bump: u8,
 }
+
+#[event]
+pub struct RolesChanged {
+    pub time: i64,
+    #[index]
+    pub app_id: Pubkey,
+}

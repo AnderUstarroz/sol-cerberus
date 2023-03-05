@@ -48,5 +48,9 @@ pub fn assign_role(
     role.address_type = assign_role_data.address_type;
     role.expires_at = assign_role_data.expires_at;
     role.created_at = utc_now();
+    emit!(RolesChanged {
+        time: role.created_at,
+        app_id: ctx.accounts.app.id,
+    });
     Ok(())
 }

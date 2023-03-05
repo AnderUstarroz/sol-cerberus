@@ -15,21 +15,29 @@ describe("2.- Rules", () => {
   });
 
   it("Add rule", async () => {
-    await PROGRAM.methods
-      .addRule({
-        namespace: 0,
-        role: role1,
-        resource: resource1,
-        permission: permission1,
-        expiresAt: null,
-      })
-      .accounts({
-        app: appPDA,
-        rule: rule1PDA,
-      })
-      .rpc();
+    let listener = null;
+    let [event, _]: any = await new Promise((resolve, _reject) => {
+      listener = PROGRAM.addEventListener("RulesChanged", (event, slot) => {
+        PROGRAM.removeEventListener(listener);
+        resolve([event, slot]);
+      });
+      PROGRAM.methods
+        .addRule({
+          namespace: 0,
+          role: role1,
+          resource: resource1,
+          permission: permission1,
+          expiresAt: null,
+        })
+        .accounts({
+          app: appPDA,
+          rule: rule1PDA,
+        })
+        .rpc();
+    });
     let rule = await PROGRAM.account.rule.fetch(rule1PDA);
     expect(rule.appId.toBase58()).to.equal(APP_ID.toBase58());
+    expect(rule.appId.toBase58()).to.equal(event.appId.toBase58());
     expect(rule.role).to.equal(role1);
     expect(rule.resource).to.equal(resource1);
     expect(rule.permission).to.equal(permission1);

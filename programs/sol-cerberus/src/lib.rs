@@ -12,6 +12,8 @@ declare_id!("SCERbrcgSPwgkrJ7j4TABr17dhYzdgiwPZUSSfFPt8x");
 
 #[program]
 pub mod sol_cerberus {
+    use crate::utils::utc_now;
+
     use super::*;
 
     pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<()> {
@@ -26,7 +28,11 @@ pub mod sol_cerberus {
         instructions::add_rule::add_rule(ctx, rule_data)
     }
 
-    pub fn delete_rule(_ctx: Context<DeleteRule>) -> Result<()> {
+    pub fn delete_rule(ctx: Context<DeleteRule>) -> Result<()> {
+        emit!(RulesChanged {
+            time: utc_now(),
+            app_id: ctx.accounts.app.id,
+        });
         Ok(())
     }
 
@@ -34,7 +40,11 @@ pub mod sol_cerberus {
         instructions::assign_role::assign_role(ctx, assign_role_data)
     }
 
-    pub fn delete_assigned_role(_ctx: Context<DeleteAssignedRole>) -> Result<()> {
+    pub fn delete_assigned_role(ctx: Context<DeleteAssignedRole>) -> Result<()> {
+        emit!(RolesChanged {
+            time: utc_now(),
+            app_id: ctx.accounts.app.id,
+        });
         Ok(())
     }
 

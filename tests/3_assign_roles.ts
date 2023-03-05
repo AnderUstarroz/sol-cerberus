@@ -18,19 +18,27 @@ describe("3.- Assign roles", () => {
   it("Assign role to NFT", async () => {
     const rolePDA = await role_pda(READ_PERM.role, NFTS.allowedNFT.mintAddress);
     const oneHourLater = Math.floor(new Date().getTime() / 1000) + 60 * 60;
-    await PROGRAM.methods
-      .assignRole({
-        address: NFTS.allowedNFT.mintAddress,
-        role: READ_PERM.role,
-        addressType: addressType.NFT,
-        expiresAt: new BN(oneHourLater),
-      })
-      .accounts({
-        app: appPDA,
-        role: rolePDA,
-      })
-      .rpc();
+    let listener = null;
+    let [event, _]: any = await new Promise((resolve, _reject) => {
+      listener = PROGRAM.addEventListener("RolesChanged", (event, slot) => {
+        PROGRAM.removeEventListener(listener);
+        resolve([event, slot]);
+      });
+      PROGRAM.methods
+        .assignRole({
+          address: NFTS.allowedNFT.mintAddress,
+          role: READ_PERM.role,
+          addressType: addressType.NFT,
+          expiresAt: new BN(oneHourLater),
+        })
+        .accounts({
+          app: appPDA,
+          role: rolePDA,
+        })
+        .rpc();
+    });
     const role = await PROGRAM.account.role.fetch(rolePDA);
+    expect(APP_ID.toBase58()).to.equal(event.appId.toBase58());
     expect(role.address.toBase58()).to.equal(
       NFTS.allowedNFT.mintAddress.toBase58()
     );

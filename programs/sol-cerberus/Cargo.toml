@@ -1,6 +1,6 @@
 [package]
 name = "sol-cerberus"
-version = "0.1.1"
+version = "0.1.2"
 description = "A fine grained Access Control List (ACL) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
