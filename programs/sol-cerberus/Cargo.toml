@@ -12,7 +12,6 @@ keywords = ["solana", "acl"]
 categories = ["authentication"]
 license = "GPL-3.0-or-later"
 
-
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "sol_cerberus"

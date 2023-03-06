@@ -2,7 +2,7 @@
 
 dependencies:
 	@if ! [ -d "deps/metaplex" ]; then \
-		git submodule add --force https://github.com/metaplex-foundation/metaplex-program-library deps/metaplex-program-library
+		git submodule add --force https://github.com/metaplex-foundation/metaplex-program-library deps/metaplex-program-library; \
 	fi
 	@echo "installing npm packages"
 	yarn
