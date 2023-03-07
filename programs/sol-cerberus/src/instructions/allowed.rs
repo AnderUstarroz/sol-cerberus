@@ -31,7 +31,7 @@ pub struct Allowed<'info> {
     )]
     pub sol_cerberus_role: Option<Account<'info, Role>>,
     #[account(
-        constraint = sol_cerberus_token_acc.owner == signer.key() @ Unauthorized // Ensure NFT owner is the signer.
+        constraint = sol_cerberus_token_acc.owner == signer.key() && sol_cerberus_token_acc.amount > 0 @ Unauthorized // Ensure NFT owner is the signer.
     )]
     pub sol_cerberus_token_acc: Option<Account<'info, TokenAccount>>,
     #[account(

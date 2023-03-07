@@ -19,6 +19,10 @@ describe("1.- Initialize APP", () => {
   // Create NFTs for testing access rules afterwards.
   before(async () => {
     appPDA = await app_pda();
+    PROVIDER.connection.requestAirdrop(
+      USER_WITH_NFTS.publicKey,
+      1_000_000_000 // 1SOL
+    );
     await safe_airdrop(
       PROVIDER.connection,
       PROVIDER.wallet.publicKey,

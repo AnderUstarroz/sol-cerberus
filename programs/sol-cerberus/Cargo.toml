@@ -1,7 +1,7 @@
 [package]
 name = "sol-cerberus"
-version = "0.1.2"
-description = "A fine grained Access Control List (ACL) for enhanced security on Solana programs"
+version = "0.1.3"
+description = "A fine grained Role-Based Access Control (RBAC) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
 homepage = "https://solcerberus.com/"
