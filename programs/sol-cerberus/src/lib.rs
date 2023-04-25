@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 use errors::*;
 use instructions::*;
+pub use mpl_token_metadata;
+pub use sol_cerberus_macros;
 use state::*;
 
 pub mod errors;

@@ -1,0 +1,21 @@
+[package]
+name = "sol-cerberus-macros"
+version = "0.1.4"
+description = "Rust macros to facilitate the integration of Sol Cerberus (RBAC) to Solana Anchor programs"
+edition = "2021"
+authors = ["Ander", "Micael"]
+homepage = "https://solcerberus.com/"
+repository = "https://github.com/AnderUstarroz/sol-cerberus"
+documentation = "https://solcerberus.com/docs"
+readme = "README.md"
+keywords = ["solana", "acl"]
+categories = ["authentication"]
+license = "GPL-3.0-or-later"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0.107", features = ["full"] }
+quote = "1.0.23"
+proc-macro2 = "1.0.51"
