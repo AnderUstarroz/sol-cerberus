@@ -1,13 +1,15 @@
 use crate::state::app::App;
 use crate::state::rule::*;
 use anchor_lang::prelude::*;
+use crate::utils::app::allowed_authority;
+use crate::Errors;
 
 #[derive(Accounts)]
 pub struct DeleteRule<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
-        has_one = authority,
+        constraint = allowed_authority(&authority.key(), &app.authority)  @ Errors::Unauthorized,
         seeds = [b"app".as_ref(), app.id.key().as_ref()], 
         bump = app.bump,
     )]

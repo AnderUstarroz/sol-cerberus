@@ -3,6 +3,7 @@ use errors::*;
 use instructions::*;
 pub use mpl_token_metadata;
 pub use sol_cerberus_macros;
+use solana_program::pubkey;
 use state::*;
 
 pub mod errors;
@@ -10,6 +11,7 @@ pub mod instructions;
 pub mod state;
 pub mod utils;
 
+const PROGRAM_AUTHORITY: Pubkey = pubkey!("SCfVPLT34pep4pHfnMTzSyMZ2kLcxjKTGS2phuiApz5");
 declare_id!("SCERbrcgSPwgkrJ7j4TABr17dhYzdgiwPZUSSfFPt8x");
 
 #[program]
@@ -20,6 +22,10 @@ pub mod sol_cerberus {
 
     pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<()> {
         instructions::initialize_app::initialize_app(ctx, app_data)
+    }
+
+    pub fn delete_app(_ctx: Context<DeleteApp>) -> Result<()> {
+        Ok(())
     }
 
     pub fn update_authority(ctx: Context<UpdateAuthority>, new_authority: Pubkey) -> Result<()> {

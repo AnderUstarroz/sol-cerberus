@@ -1,11 +1,10 @@
 use crate::state::app::App;
-use crate::state::role::Role;
-use anchor_lang::prelude::*;
 use crate::utils::app::allowed_authority;
 use crate::Errors;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-pub struct DeleteAssignedRole<'info> {
+pub struct DeleteApp<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
@@ -14,13 +13,6 @@ pub struct DeleteAssignedRole<'info> {
         bump = app.bump,
     )]
     pub app: Account<'info, App>,
-    #[account(
-        mut,
-        close = collector,
-        seeds = [role.role.as_ref(), role.address.key().as_ref(), app.id.key().as_ref()], 
-        bump = role.bump,
-    )]
-    pub role: Account<'info, Role>,
     /// CHECK: collector of the funds
     #[account(mut)]
     collector: AccountInfo<'info>,
