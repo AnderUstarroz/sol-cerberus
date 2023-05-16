@@ -1,3 +1,4 @@
+use crate::utils::utc_now;
 use crate::{state::app::*, utils::validate_string_len};
 use anchor_lang::prelude::*;
 
@@ -7,8 +8,11 @@ use anchor_lang::prelude::*;
 // + 32 authority (Pubkey)
 // + 1 + 32 Option<backup> (Pubkey)
 // + 4 + 16 name (string)
+// + 8 updated_at
+// + 1 cached
+// + 1 + 8 Option<u64>
 // + 1 bump
-// total = 8 + 32  + 32 + 1 + 32 + 4 + 16 + 1 = 126
+// total = 8 + 32  + 32 + 1 + 32 + 4 + 16 + 8 + 1 + 1 + 8 + 1 = 144
 #[derive(Accounts)]
 #[instruction(app_data: AppData)]
 pub struct InitializeApp<'info> {
@@ -17,7 +21,7 @@ pub struct InitializeApp<'info> {
     #[account(
         init,
         payer = authority,
-        space = 126,
+        space = 1000,
         seeds = [b"app".as_ref(), app_data.id.key().as_ref()], 
         bump
     )]
@@ -31,6 +35,8 @@ pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<
     app.authority = ctx.accounts.authority.key();
     app.recovery = app_data.recovery;
     app.name = validate_string_len(&app_data.name, 0, 16)?;
+    app.cached = false;
+    app.updated_at = utc_now();
     app.bump = *ctx.bumps.get("app").unwrap();
     Ok(())
 }

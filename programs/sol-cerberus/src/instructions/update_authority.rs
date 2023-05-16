@@ -1,4 +1,5 @@
 use crate::state::app::*;
+use crate::utils::utc_now;
 use crate::Errors;
 use anchor_lang::prelude::*;
 
@@ -18,5 +19,6 @@ pub struct UpdateAuthority<'info> {
 pub fn update_authority(ctx: Context<UpdateAuthority>, new_authority: Pubkey) -> Result<()> {
     let app = &mut ctx.accounts.app;
     app.authority = new_authority;
+    app.updated_at = utc_now();
     Ok(())
 }

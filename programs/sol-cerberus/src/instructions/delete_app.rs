@@ -8,6 +8,8 @@ pub struct DeleteApp<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
     #[account(
+        mut,
+        close = collector,
         constraint = allowed_authority(&authority.key(), &app.authority)  @ Errors::Unauthorized,
         seeds = [b"app".as_ref(), app.id.key().as_ref()], 
         bump = app.bump,

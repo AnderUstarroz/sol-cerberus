@@ -12,6 +12,9 @@ pub struct App {
     pub id: Pubkey,
     pub authority: Pubkey,
     pub recovery: Option<Pubkey>, // Only recovery or authority accounts can update the App Authority.
-    pub name: String,
     pub bump: u8,
+    pub name: String,
+    pub updated_at: i64,
+    pub cached: bool,
+    pub fee: Option<u64>,
 }
