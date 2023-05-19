@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { expect } from "chai";
+import { expect, assert } from "chai";
 import { app_pda, safe_airdrop } from "./common";
 import {
   APP_ID,
@@ -72,6 +72,7 @@ describe("1.- Initialize APP", () => {
         id: APP_ID,
         recovery: RECOVERY_KEYPAIR.publicKey,
         name: appName,
+        cached: false,
       })
       .accounts({
         app: appPDA,
@@ -89,7 +90,12 @@ describe("1.- Initialize APP", () => {
     try {
       // Unauthorized users shouldn't be able to update App authority
       await PROGRAM.methods
-        .updateAuthority(unauthorized_keypair.publicKey)
+        .updateApp({
+          authority: unauthorized_keypair.publicKey,
+          recovery: RECOVERY_KEYPAIR.publicKey,
+          name: "myapp-recovered",
+          cached: false,
+        })
         .accounts({
           app: appPDA,
           signer: unauthorized_keypair.publicKey,
@@ -106,18 +112,30 @@ describe("1.- Initialize APP", () => {
     }
     // Verify current Authority can update the authority of the APP
     await PROGRAM.methods
-      .updateAuthority(unauthorized_keypair.publicKey)
+      .updateApp({
+        authority: unauthorized_keypair.publicKey,
+        recovery: RECOVERY_KEYPAIR.publicKey,
+        name: "myapp-recovered1",
+        cached: true,
+      })
       .accounts({
         app: appPDA,
       })
       .rpc();
     let app = await PROGRAM.account.app.fetch(appPDA);
+    expect(app.name).to.equal("myapp-recovered1");
+    assert.isTrue(app.cached);
     expect(app.authority.toBase58()).to.equal(
       unauthorized_keypair.publicKey.toBase58()
     );
     // Verify recovery can also update the authority of the APP
     await PROGRAM.methods
-      .updateAuthority(PROVIDER.wallet.publicKey)
+      .updateApp({
+        authority: PROVIDER.wallet.publicKey,
+        recovery: RECOVERY_KEYPAIR.publicKey,
+        name: "myapp-recovered2",
+        cached: false,
+      })
       .accounts({
         app: appPDA,
         signer: RECOVERY_KEYPAIR.publicKey,
@@ -125,6 +143,8 @@ describe("1.- Initialize APP", () => {
       .signers([RECOVERY_KEYPAIR])
       .rpc();
     app = await PROGRAM.account.app.fetch(appPDA);
+    expect(app.name).to.equal("myapp-recovered2");
+    assert.isFalse(app.cached);
     expect(app.authority.toBase58()).to.equal(
       PROVIDER.wallet.publicKey.toBase58()
     );

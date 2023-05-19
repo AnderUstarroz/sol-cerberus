@@ -5,7 +5,8 @@ pub use delete_app::*;
 pub use delete_assigned_role::*;
 pub use delete_rule::*;
 pub use initialize_app::*;
-pub use update_authority::*;
+pub use update_app::*;
+pub use update_cache::*;
 
 pub mod add_rule;
 pub mod allowed;
@@ -14,4 +15,5 @@ pub mod delete_app;
 pub mod delete_assigned_role;
 pub mod delete_rule;
 pub mod initialize_app;
-pub mod update_authority;
+pub mod update_app;
+pub mod update_cache;

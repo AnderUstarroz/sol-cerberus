@@ -5,6 +5,15 @@ pub struct AppData {
     pub id: Pubkey,
     pub recovery: Option<Pubkey>,
     pub name: String,
+    pub cached: bool,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Debug)]
+pub struct UpdateAppData {
+    pub authority: Pubkey,
+    pub recovery: Option<Pubkey>,
+    pub name: String,
+    pub cached: bool,
 }
 
 #[account]
@@ -17,4 +26,12 @@ pub struct App {
     pub updated_at: i64,
     pub cached: bool,
     pub fee: Option<u64>,
+}
+
+#[event]
+pub struct AppChanged {
+    pub time: i64,
+    #[index]
+    pub app_id: Pubkey,
+    pub authority: Pubkey,
 }

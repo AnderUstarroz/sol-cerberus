@@ -35,8 +35,13 @@ pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<
     app.authority = ctx.accounts.authority.key();
     app.recovery = app_data.recovery;
     app.name = validate_string_len(&app_data.name, 0, 16)?;
-    app.cached = false;
+    app.cached = app_data.cached;
     app.updated_at = utc_now();
     app.bump = *ctx.bumps.get("app").unwrap();
+    emit!(AppChanged {
+        time: app.updated_at,
+        app_id: ctx.accounts.app.id,
+        authority: ctx.accounts.app.authority,
+    });
     Ok(())
 }

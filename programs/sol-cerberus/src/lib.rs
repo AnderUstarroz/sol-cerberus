@@ -24,12 +24,17 @@ pub mod sol_cerberus {
         instructions::initialize_app::initialize_app(ctx, app_data)
     }
 
-    pub fn delete_app(_ctx: Context<DeleteApp>) -> Result<()> {
-        Ok(())
+    pub fn update_app(ctx: Context<UpdateApp>, app_data: UpdateAppData) -> Result<()> {
+        instructions::update_app::update_app(ctx, app_data)
     }
 
-    pub fn update_authority(ctx: Context<UpdateAuthority>, new_authority: Pubkey) -> Result<()> {
-        instructions::update_authority::update_authority(ctx, new_authority)
+    pub fn delete_app(ctx: Context<DeleteApp>) -> Result<()> {
+        emit!(AppChanged {
+            time: utc_now(),
+            app_id: ctx.accounts.app.id,
+            authority: ctx.accounts.app.authority,
+        });
+        Ok(())
     }
 
     pub fn add_rule(ctx: Context<AddRule>, rule_data: RuleData) -> Result<()> {
@@ -54,6 +59,14 @@ pub mod sol_cerberus {
             app_id: ctx.accounts.app.id,
         });
         Ok(())
+    }
+
+    /**
+     * Updates the app.updated_at field so clients
+     * can keep track and cache permissions.
+     */
+    pub fn update_cache(ctx: Context<UpdateCache>) -> Result<()> {
+        instructions::update_cache::update_cache(ctx)
     }
 
     pub fn allowed(ctx: Context<Allowed>, allowed_params: AllowedRule) -> Result<()> {
