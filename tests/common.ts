@@ -31,12 +31,15 @@ export async function rule_pda(
   )[0];
 }
 
-export async function role_pda(role, address: PublicKey) {
+/**
+ *  Empty Addresses are considered wildcards "*" (role will be applied to all users)
+ */
+export async function role_pda(role, address: PublicKey | null) {
   return (
     await PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode(role),
-        address.toBuffer(),
+        address ? address.toBuffer() : anchor.utils.bytes.utf8.encode("*"),
         APP_ID.toBuffer(),
       ],
       PROGRAM.programId
@@ -82,10 +85,16 @@ export async function safe_airdrop(
   }
 }
 
-export const READ_PERM = {
+export const WRITE_PERM = {
   role: "Authenticated",
   resource: "Homepage",
   permission: "Write",
+};
+
+export const READ_PERM = {
+  role: "Anonymous",
+  resource: "*",
+  permission: "Read",
 };
 
 export async function tx_size(

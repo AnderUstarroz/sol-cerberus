@@ -9,7 +9,9 @@ import {
   METAPLEX,
   PROGRAM,
   PROVIDER_WALLET,
-  USER_WITH_NFTS,
+  WALLET_WITH_NFTS,
+  ALLOWED_WALLET,
+  ANOTHER_WALLET,
 } from "./constants";
 
 describe("1.- Initialize APP", () => {
@@ -20,13 +22,25 @@ describe("1.- Initialize APP", () => {
   before(async () => {
     appPDA = await app_pda();
     PROVIDER.connection.requestAirdrop(
-      USER_WITH_NFTS.publicKey,
+      WALLET_WITH_NFTS.publicKey,
       1_000_000_000 // 1SOL
     );
     await safe_airdrop(
       PROVIDER.connection,
       PROVIDER.wallet.publicKey,
-      2 * anchor.web3.LAMPORTS_PER_SOL // 5 SOL
+      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
+    );
+    // Async airdrop for wallet user
+    safe_airdrop(
+      PROVIDER.connection,
+      ALLOWED_WALLET.publicKey,
+      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
+    );
+    // Async airdrop for another wallet user
+    safe_airdrop(
+      PROVIDER.connection,
+      ANOTHER_WALLET.publicKey,
+      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
     );
     const collection = await METAPLEX.nfts().create({
       name: "Collection",
@@ -39,14 +53,14 @@ describe("1.- Initialize APP", () => {
       name: "Allowed NFT",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft1-hash",
-      tokenOwner: USER_WITH_NFTS.publicKey,
+      tokenOwner: WALLET_WITH_NFTS.publicKey,
       isMutable: true,
     });
     NFTS["allowedCollection"] = await METAPLEX.nfts().create({
       name: "Allowed collection",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft2-hash",
-      tokenOwner: USER_WITH_NFTS.publicKey,
+      tokenOwner: WALLET_WITH_NFTS.publicKey,
       isMutable: true,
       collection: collection.mintAddress,
       collectionAuthority: PROVIDER_WALLET.payer, // This will set the Collection verified flag to true
@@ -55,7 +69,7 @@ describe("1.- Initialize APP", () => {
       name: "Not allowed NFT",
       sellerFeeBasisPoints: 0,
       uri: "https://arweave.net/nft3-hash",
-      tokenOwner: USER_WITH_NFTS.publicKey,
+      tokenOwner: WALLET_WITH_NFTS.publicKey,
       isMutable: true,
     });
   });

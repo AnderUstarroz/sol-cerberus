@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { app_pda, READ_PERM, rule_pda } from "./common";
+import { app_pda, WRITE_PERM, rule_pda, READ_PERM } from "./common";
 import { APP_ID, PROGRAM, PROVIDER } from "./constants";
 
 describe("2.- Rules", () => {
@@ -16,7 +16,7 @@ describe("2.- Rules", () => {
 
   it("Add rule", async () => {
     let listener = null;
-    let [event, _]: any = await new Promise((resolve, _reject) => {
+    let [event, _]: any = await new Promise((resolve, reject) => {
       listener = PROGRAM.addEventListener("RulesChanged", (event, slot) => {
         PROGRAM.removeEventListener(listener);
         resolve([event, slot]);
@@ -30,10 +30,19 @@ describe("2.- Rules", () => {
           expiresAt: null,
         })
         .accounts({
-          app: appPDA,
           rule: rule1PDA,
+          solCerberusApp: appPDA,
+          solCerberusRole: null,
+          solCerberusRule: null,
+          solCerberusRule2: null,
+          solCerberusToken: null,
+          solCerberusMetadata: null,
         })
         .rpc();
+      // Break infinite loop in case it fails:
+      setTimeout(() => {
+        reject(new Error("Failed to add rule"));
+      }, 2000);
     });
     let rule = await PROGRAM.account.rule.fetch(rule1PDA);
     expect(rule.appId.toBase58()).to.equal(APP_ID.toBase58());
@@ -41,15 +50,32 @@ describe("2.- Rules", () => {
     expect(rule.role).to.equal(role1);
     expect(rule.resource).to.equal(resource1);
     expect(rule.permission).to.equal(permission1);
-    expect(rule.createdAt.toNumber()).to.lessThanOrEqual(
-      Math.floor(new Date().getTime() / 1000)
-    );
 
-    const rule2PDA = await rule_pda(
-      READ_PERM.role,
-      READ_PERM.resource,
-      READ_PERM.permission
-    );
+    // Add Write rule
+    await PROGRAM.methods
+      .addRule({
+        namespace: 0,
+        role: WRITE_PERM.role,
+        resource: WRITE_PERM.resource,
+        permission: WRITE_PERM.permission,
+        expiresAt: null,
+      })
+      .accounts({
+        rule: await rule_pda(
+          WRITE_PERM.role,
+          WRITE_PERM.resource,
+          WRITE_PERM.permission
+        ),
+        solCerberusApp: appPDA,
+        solCerberusRole: null,
+        solCerberusRule: null,
+        solCerberusRule2: null,
+        solCerberusToken: null,
+        solCerberusMetadata: null,
+      })
+      .rpc();
+
+    // Add Read rule
     await PROGRAM.methods
       .addRule({
         namespace: 0,
@@ -59,8 +85,17 @@ describe("2.- Rules", () => {
         expiresAt: null,
       })
       .accounts({
-        app: appPDA,
-        rule: rule2PDA,
+        rule: await rule_pda(
+          READ_PERM.role,
+          READ_PERM.resource,
+          READ_PERM.permission
+        ),
+        solCerberusApp: appPDA,
+        solCerberusRole: null,
+        solCerberusRule: null,
+        solCerberusRule2: null,
+        solCerberusToken: null,
+        solCerberusMetadata: null,
       })
       .rpc();
   });
@@ -69,9 +104,14 @@ describe("2.- Rules", () => {
     await PROGRAM.methods
       .deleteRule()
       .accounts({
-        app: appPDA,
         rule: rule1PDA,
         collector: PROVIDER.wallet.publicKey,
+        solCerberusApp: appPDA,
+        solCerberusRole: null,
+        solCerberusRule: null,
+        solCerberusRule2: null,
+        solCerberusToken: null,
+        solCerberusMetadata: null,
       })
       .rpc();
     try {

@@ -74,7 +74,7 @@ mod tests {
                     sol_cerberus_app: AccountInfo<'info>,
                     sol_cerberus_rule: AccountInfo<'info>,
                     sol_cerberus_role: Option<AccountInfo<'info>>,
-                    sol_cerberus_token_acc: Option<AccountInfo<'info>>,
+                    sol_cerberus_token: Option<AccountInfo<'info>>,
                     sol_cerberus_metadata: Option<AccountInfo<'info>>,
                 }
             }
@@ -155,9 +155,9 @@ mod tests {
         //     #[doc = r" CHECK: Validated on CPI call"]
         //     pub sol_cerberus_role: Option<UncheckedAccount<'info>>,
         //     #[cfg_attr(not(test), account(
-        //         constraint = sol_cerberus_token_acc.mint == sol_cerberus_metadata.as_ref().unwrap().mint @ sol_cerberus :: errors ::Errors :: Unauthorized,
-        //         constraint = sol_cerberus_token_acc.owner == signer.key() @ sol_cerberus :: errors :: Errors :: Unauthorized))]
-        //     pub sol_cerberus_token_acc: Option<Account<'info, anchor_spl::token::TokenAccount>>,
+        //         constraint = sol_cerberus_token.mint == sol_cerberus_metadata.as_ref().unwrap().mint @ sol_cerberus :: errors ::Errors :: Unauthorized,
+        //         constraint = sol_cerberus_token.owner == signer.key() @ sol_cerberus :: errors :: Errors :: Unauthorized))]
+        //     pub sol_cerberus_token: Option<Account<'info, anchor_spl::token::TokenAccount>>,
         //     #[cfg_attr(not(test), account(
         //         seeds = [b"metadata", mpl_token_metadata :: ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()], seeds :: program = mpl_token_metadata :: ID, bump,))]
         //     pub sol_cerberus_metadata:
@@ -178,7 +178,7 @@ mod tests {
         //                 None => None,
         //                 Some(x) => Some(x.to_account_info()),
         //             },
-        //             sol_cerberus_token_acc: match self.sol_cerberus_token_acc.as_ref() {
+        //             sol_cerberus_token: match self.sol_cerberus_token.as_ref() {
         //                 None => None,
         //                 Some(x) => Some(x.to_account_info()),
         //             },
@@ -191,8 +191,8 @@ mod tests {
         //     }
         // }
 
-        // let token_acc = anchor_spl::token::TokenAccount {
-        //     account: "token_acc".to_string(),
+        // let token = anchor_spl::token::TokenAccount {
+        //     account: "token".to_string(),
         // };
         // let metadata_acc = anchor_spl::metadata::MetadataAccount {
         //     account: "metadata_acc".to_string(),
@@ -204,8 +204,8 @@ mod tests {
         //     sol_cerberus_app: UncheckedAccount { msg: &"app" },
         //     sol_cerberus_rule: UncheckedAccount { msg: &"rule" },
         //     sol_cerberus_role: Some(UncheckedAccount { msg: &"role" }),
-        //     sol_cerberus_token_acc: Some(Account {
-        //         account: &token_acc,
+        //     sol_cerberus_token: Some(Account {
+        //         account: &token,
         //     }),
         //     sol_cerberus_metadata: Some(Account {
         //         account: &metadata_acc,

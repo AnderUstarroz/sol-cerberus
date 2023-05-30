@@ -1,5 +1,6 @@
-use crate::state::app::App;
+use crate::state::app::{App, AppChanged};
 use crate::utils::app::allowed_authority;
+use crate::utils::utc_now;
 use crate::Errors;
 use anchor_lang::prelude::*;
 
@@ -18,4 +19,13 @@ pub struct DeleteApp<'info> {
     /// CHECK: collector of the funds
     #[account(mut)]
     collector: AccountInfo<'info>,
+}
+
+pub fn delete_app(ctx: Context<DeleteApp>) -> Result<()> {
+    emit!(AppChanged {
+        time: utc_now(),
+        app_id: ctx.accounts.app.id,
+        authority: ctx.accounts.app.authority,
+    });
+    Ok(())
 }

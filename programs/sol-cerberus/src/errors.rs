@@ -16,6 +16,10 @@ pub enum Errors {
     Unauthorized,
     #[msg("The Sol Cerberus APP ID does not match the one defined in the program")]
     InvalidAppID,
+    #[msg("Invalid address type, mus be either 'Wallet', 'Nft', 'Collection' or a wildcard '*'")]
+    InvalidAddressType,
+    #[msg("Invalid namespace, must be either an u8 number (0-255) or a wildcard '*'")]
+    InvalidNamespace,
     #[msg("SOL_CERBERUS_APP_ID is missing on lib.rs")]
     SolCerberusAppIdMissing,
 }

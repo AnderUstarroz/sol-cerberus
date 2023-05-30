@@ -63,6 +63,7 @@ pub fn rule_macro(args: TokenStream, item: TokenStream) -> TokenStream {
             #ctx_arg_name.accounts.sol_cerberus_ctx(),
             sol_cerberus::instructions::AllowedRule {
                 app_id: SOL_CERBERUS_APP_ID,
+                namespace: 0 as u8, // Rule
                 resource: #resource.to_string(),
                 permission: #permission.to_string(),
             }

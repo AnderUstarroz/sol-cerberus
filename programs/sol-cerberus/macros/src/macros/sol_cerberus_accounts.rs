@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse::Parser, parse_macro_input, Field, ItemStruct, Lifetime, Fields};
+use syn::{parse::Parser, parse_macro_input, Field, Fields, ItemStruct, Lifetime};
 
 fn is_signer(field: &syn::Field) -> bool {
     if let syn::Type::Path(ref path) = field.ty {
@@ -25,7 +25,8 @@ pub fn sol_cerberus_accounts_macro<'info>(_: TokenStream, item: TokenStream) -> 
     let mut new_fields = match item.fields {
         Fields::Named(named_fields) => {
             let mut new_named_fields = named_fields.clone();
-            new_named_fields.named = named_fields.named
+            new_named_fields.named = named_fields
+                .named
                 .into_iter()
                 .filter(|field| {
                     if is_signer(field) {
@@ -39,7 +40,7 @@ pub fn sol_cerberus_accounts_macro<'info>(_: TokenStream, item: TokenStream) -> 
                 })
                 .collect();
             Fields::Named(new_named_fields)
-        },
+        }
         other_fields => other_fields,
     };
 
@@ -65,22 +66,17 @@ pub fn sol_cerberus_accounts_macro<'info>(_: TokenStream, item: TokenStream) -> 
             /// CHECK: Validated on CPI call
             pub sol_cerberus_role: Option<UncheckedAccount<#lifetime>>
         }));
-        // Ensure Metadata and NFT accounts belongs to the same token.
-        // Ensure NFT owner is the signer.
         fields.named.push(parse_field(quote! {
-            #[cfg_attr(not(test), account(
-                constraint = sol_cerberus_token_acc.owner == #signer.key() && sol_cerberus_token_acc.amount > 0 @ sol_cerberus::errors::Errors::Unauthorized 
-            ))]
-            pub sol_cerberus_token_acc: Option<Account<#lifetime, anchor_spl::token::TokenAccount>>
+            #[cfg_attr(not(test), account())]
+            pub sol_cerberus_token: Option<Box<Account<#lifetime, anchor_spl::token::TokenAccount>>>
         }));
         fields.named.push(parse_field(quote! {
             #[cfg_attr(not(test), account(
                 seeds = [b"metadata", sol_cerberus::mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
                 seeds::program = sol_cerberus::mpl_token_metadata::ID,
-                constraint = sol_cerberus_metadata.mint == sol_cerberus_token_acc.as_ref().unwrap().mint @ sol_cerberus::errors::Errors::Unauthorized, // Ensure Metadata and NFT accounts belongs to the same token.
                 bump,
             ))]
-            pub sol_cerberus_metadata: Option<Account<#lifetime, anchor_spl::metadata::MetadataAccount>>
+            pub sol_cerberus_metadata: Option<Box<Account<#lifetime, anchor_spl::metadata::MetadataAccount>>>
         }));
         fields.named.push(parse_field(quote! {
             pub sol_cerberus: Program<'info, SolCerberus>
@@ -105,7 +101,7 @@ pub fn sol_cerberus_accounts_macro<'info>(_: TokenStream, item: TokenStream) -> 
                         None => None,
                         Some(x) => Some(x.to_account_info()),
                     },
-                    sol_cerberus_token_acc: match self.sol_cerberus_token_acc.as_ref() {
+                    sol_cerberus_token: match self.sol_cerberus_token.as_ref() {
                         None => None,
                         Some(x) => Some(x.to_account_info()),
                     },

@@ -83,7 +83,7 @@ pub struct MyContext<'info> {
     /// CHECK: Validated on CPI call
     pub sol_cerberus_role: Option<UncheckedAccount<'info>>,
     /// CHECK: Validated on CPI call
-    pub sol_cerberus_token_acc: Option<UncheckedAccount<'info>>,
+    pub sol_cerberus_token: Option<UncheckedAccount<'info>>,
     /// CHECK: Validated on CPI call
     pub sol_cerberus_metadata: Option<UncheckedAccount<'info>>,
     pub sol_cerberus: Program<'info, SolCerberus>,

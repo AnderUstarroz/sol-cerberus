@@ -1,22 +1,21 @@
 use anchor_lang::prelude::*;
+pub use constants::*;
 use errors::*;
 use instructions::*;
 pub use mpl_token_metadata;
 pub use sol_cerberus_macros;
-use solana_program::pubkey;
 use state::*;
 
+pub mod constants;
 pub mod errors;
 pub mod instructions;
 pub mod state;
 pub mod utils;
 
-const PROGRAM_AUTHORITY: Pubkey = pubkey!("SCfVPLT34pep4pHfnMTzSyMZ2kLcxjKTGS2phuiApz5");
 declare_id!("SCERbrcgSPwgkrJ7j4TABr17dhYzdgiwPZUSSfFPt8x");
 
 #[program]
 pub mod sol_cerberus {
-    use crate::utils::utc_now;
 
     use super::*;
 
@@ -29,12 +28,7 @@ pub mod sol_cerberus {
     }
 
     pub fn delete_app(ctx: Context<DeleteApp>) -> Result<()> {
-        emit!(AppChanged {
-            time: utc_now(),
-            app_id: ctx.accounts.app.id,
-            authority: ctx.accounts.app.authority,
-        });
-        Ok(())
+        instructions::delete_app::delete_app(ctx)
     }
 
     pub fn add_rule(ctx: Context<AddRule>, rule_data: RuleData) -> Result<()> {
@@ -42,11 +36,7 @@ pub mod sol_cerberus {
     }
 
     pub fn delete_rule(ctx: Context<DeleteRule>) -> Result<()> {
-        emit!(RulesChanged {
-            time: utc_now(),
-            app_id: ctx.accounts.app.id,
-        });
-        Ok(())
+        instructions::delete_rule::delete_rule(ctx)
     }
 
     pub fn assign_role(ctx: Context<AssignRole>, assign_role_data: AssignRoleData) -> Result<()> {
@@ -54,11 +44,7 @@ pub mod sol_cerberus {
     }
 
     pub fn delete_assigned_role(ctx: Context<DeleteAssignedRole>) -> Result<()> {
-        emit!(RolesChanged {
-            time: utc_now(),
-            app_id: ctx.accounts.app.id,
-        });
-        Ok(())
+        instructions::delete_assigned_role::delete_assigned_role(ctx)
     }
 
     /**
@@ -69,7 +55,19 @@ pub mod sol_cerberus {
         instructions::update_cache::update_cache(ctx)
     }
 
-    pub fn allowed(ctx: Context<Allowed>, allowed_params: AllowedRule) -> Result<()> {
-        instructions::allowed::allowed(ctx, allowed_params)
+    /**
+     * Checks if the current user is authorized to run the instruction,
+     * throwing "Unauthorized" error otherwise.
+     */
+    pub fn allowed(ctx: Context<Allowed>, allowed_rule: AllowedRule) -> Result<()> {
+        instructions::allowed::allowed(
+            &ctx.accounts.signer,
+            &ctx.accounts.sol_cerberus_app,
+            &ctx.accounts.sol_cerberus_role,
+            &ctx.accounts.sol_cerberus_rule,
+            &ctx.accounts.sol_cerberus_token,
+            &ctx.accounts.sol_cerberus_metadata,
+            allowed_rule,
+        )
     }
 }
