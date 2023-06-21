@@ -12,6 +12,7 @@ import {
   WALLET_WITH_NFTS,
   ALLOWED_WALLET,
   ANOTHER_WALLET,
+  classes,
 } from "./constants";
 
 describe("1.- Initialize APP", () => {
@@ -25,21 +26,27 @@ describe("1.- Initialize APP", () => {
       WALLET_WITH_NFTS.publicKey,
       1_000_000_000 // 1SOL
     );
-    await safe_airdrop(
-      PROVIDER.connection,
-      PROVIDER.wallet.publicKey,
-      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
-    );
     // Async airdrop for wallet user
     safe_airdrop(
       PROVIDER.connection,
       ALLOWED_WALLET.publicKey,
       2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
     );
+    // Async airdrop for wallet with NFT user
+    safe_airdrop(
+      PROVIDER.connection,
+      WALLET_WITH_NFTS.publicKey,
+      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
+    );
     // Async airdrop for another wallet user
     safe_airdrop(
       PROVIDER.connection,
       ANOTHER_WALLET.publicKey,
+      2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
+    );
+    await safe_airdrop(
+      PROVIDER.connection,
+      PROVIDER.wallet.publicKey,
       2 * anchor.web3.LAMPORTS_PER_SOL // 2 SOL
     );
     const collection = await METAPLEX.nfts().create({
@@ -109,6 +116,9 @@ describe("1.- Initialize APP", () => {
           recovery: RECOVERY_KEYPAIR.publicKey,
           name: "myapp-recovered",
           cached: false,
+          fee: null,
+          class: classes.Trial,
+          expiresAt: null,
         })
         .accounts({
           app: appPDA,
@@ -131,6 +141,9 @@ describe("1.- Initialize APP", () => {
         recovery: RECOVERY_KEYPAIR.publicKey,
         name: "myapp-recovered1",
         cached: true,
+        fee: null,
+        class: classes.Trial,
+        expiresAt: null,
       })
       .accounts({
         app: appPDA,
@@ -149,6 +162,9 @@ describe("1.- Initialize APP", () => {
         recovery: RECOVERY_KEYPAIR.publicKey,
         name: "myapp-recovered2",
         cached: false,
+        fee: null,
+        class: classes.Trial,
+        expiresAt: null,
       })
       .accounts({
         app: appPDA,

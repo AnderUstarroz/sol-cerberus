@@ -37,6 +37,7 @@ describe("2.- Rules", () => {
           solCerberusRule2: null,
           solCerberusToken: null,
           solCerberusMetadata: null,
+          solCerberusSeed: null,
         })
         .rpc();
       // Break infinite loop in case it fails:
@@ -72,6 +73,7 @@ describe("2.- Rules", () => {
         solCerberusRule2: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
 
@@ -96,6 +98,7 @@ describe("2.- Rules", () => {
         solCerberusRule2: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });
@@ -112,6 +115,7 @@ describe("2.- Rules", () => {
         solCerberusRule2: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
     try {

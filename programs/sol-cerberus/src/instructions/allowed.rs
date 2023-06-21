@@ -1,17 +1,16 @@
 use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
-use solana_program::pubkey;
-use crate::state::App;
+use crate::state::{App, Seed};
 use crate::state::rule::Rule;
-use crate::utils::{allowed_perm, utc_now, address_or_wildcard, allowed_authority};
+use crate::utils::{allowed_perm, utc_now, address_or_wildcard, allowed_authority, get_fee, subtract_rent_exemption_from_fee};
 use crate::state::role::Role;
+use crate::constants::TEST_APP_ID;
 use anchor_lang::prelude::*;
-use crate::Errors::{Unauthorized, InvalidAppID};
+use crate::Errors::{Unauthorized, InvalidAppID, MissingSeedAccount};
 
-const TEST_APP_ID: Pubkey = pubkey!("testX83crd4vAgRrvmwXgVQ2r69uCpg8xzh8A5X124x");
 
 #[derive(Accounts)]
 pub struct Allowed<'info> {
-    #[account()]
+    #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
         seeds = [b"app".as_ref(), sol_cerberus_app.id.key().as_ref()], 
@@ -36,6 +35,15 @@ pub struct Allowed<'info> {
         bump,
     )]
     pub sol_cerberus_metadata: Option< Box<Account<'info, MetadataAccount>>>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 9, // Account discriminator + initialized
+        seeds = [b"seed".as_ref(), signer.key.as_ref()],
+        bump
+    )]
+    pub sol_cerberus_seed: Option<Account<'info, Seed>>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Debug)]
@@ -47,14 +55,16 @@ pub struct AllowedRule {
 }
 
 
-pub fn allowed(
-    signer:&Signer,
-    app:&Box<Account<App>>,
-    role:&Option<Box<Account<Role>>>,
-    rule:&Option<Box<Account<Rule>>>,
-    token:&Option<Box<Account<TokenAccount>>>,
-    metadata:&Option<Box<Account<MetadataAccount>>>,
-    allowed_rule:AllowedRule) -> Result<()> {
+pub fn allowed<'info>(
+    signer: &Signer<'info>,
+    app: &Box<Account<'info, App>>,
+    role: &Option<Box<Account<'info, Role>>>,
+    rule: &Option<Box<Account<'info, Rule>>>,
+    token: &Option<Box<Account<'info, TokenAccount>>>,
+    metadata: &Option<Box<Account<'info, MetadataAccount>>>,
+    seed: &mut Option<Account<'info, Seed>>,
+    system_program: &Program<'info, anchor_lang::system_program::System>,
+    allowed_rule: AllowedRule) -> Result<()> {
     // The APP ID must be the one authorized by the program
     if allowed_rule.app_id != app.id.key(){
         // Ignore APP Check on Test APP
@@ -63,9 +73,25 @@ pub fn allowed(
         }
     }
     
-    // Authority is always allowed
+    // APP Authority is always allowed (No fees)
     if allowed_authority(&signer.key(), &app.authority.key()){
         return Ok(());
+    }
+
+    let mut fee:  u64 = get_fee(app);
+    // Seed account is mandatory when Fee is defined and using normal "Rule"
+    if fee > 0 && seed.is_none() {
+        return Err(error!(MissingSeedAccount))
+    }
+
+    // Initialize Seed account (if needed)
+    // First call to "allowed()" on each wallet initializes a seed account which will be used to collect fees
+    // therefore the rent exemption fee from the account should be deducted from the regular fee.
+    if seed.is_some() && !seed.as_ref().unwrap().initialized{
+        fee = subtract_rent_exemption_from_fee(fee);
+        seed.as_mut().map(|s| {
+            s.initialized = true;
+        });
     }
 
     // Rule or Role can only be empty when using Authority
@@ -107,7 +133,7 @@ pub fn allowed(
     }
     // Check if the wallet is authorized (Address = "None" is considered wildcard "*")
       if role.address.is_none() || signer.key() == role.address.unwrap(){
-        return Ok(());
+            return pay_fee(system_program, signer, seed, fee);
     }
     // Check if the NFT or Collection Mint addresses are authorized
     if token.is_some(){
@@ -118,7 +144,7 @@ pub fn allowed(
         }
         // NFT authorized (Address = "None" is considered wildcard "*")
         if role.address.is_none() || token.mint == role.address.unwrap(){
-            return Ok(());
+            return pay_fee(system_program, signer, seed, fee);
         }
         if  metadata.is_some() {
             let metadata = metadata.as_ref().unwrap();
@@ -126,7 +152,7 @@ pub fn allowed(
                 let collection = metadata.collection.as_ref().unwrap();
                 // Collection authorized (Address = "None" is considered wildcard "*")
                 if collection.verified && (role.address.is_none() || collection.key == role.address.unwrap()){
-                    return Ok(());
+                    return pay_fee(system_program, signer, seed, fee);
                 }
             }
         }
@@ -135,3 +161,21 @@ pub fn allowed(
     Err(error!(Unauthorized))
 }
 
+/// Pay fee (when defined)
+pub fn pay_fee<'info>(system_program:&Program<'info, anchor_lang::system_program::System>, payer:&Signer<'info>, receiver:&Option<Account<'info,Seed>>, fee:u64)-> Result<()>{
+    if fee > 0 {
+        if receiver.is_none(){
+            return Err(error!(MissingSeedAccount));
+        }
+        let cpi_context = CpiContext::new(
+            system_program.to_account_info(),
+            anchor_lang::system_program::Transfer {
+                from: payer.to_account_info(),
+                to: receiver.as_ref().unwrap().to_account_info(),
+            },
+        );
+        anchor_lang::system_program::transfer(cpi_context, fee)?;
+    }
+
+    Ok(())
+}

@@ -1,5 +1,5 @@
 use crate::instructions::allowed::{allowed, AllowedRule};
-use crate::state::app::App;
+use crate::state::app::{App, Seed};
 use crate::state::role::*;
 use crate::state::rule::{Namespaces, Rule};
 use crate::utils::{roles::address_or_wildcard, rules::*, utc_now};
@@ -20,10 +20,10 @@ use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 #[instruction(assign_role_data:AssignRoleData)]
 pub struct AssignRole<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub signer: Signer<'info>,
     #[account(
         init,
-        payer = authority,
+        payer = signer,
         space = 104,
         seeds = [assign_role_data.role.as_ref(), address_or_wildcard(&assign_role_data.address), sol_cerberus_app.id.key().as_ref()],
         constraint = valid_rule(&assign_role_data.role, true)  @ InvalidRole,
@@ -53,17 +53,27 @@ pub struct AssignRole<'info> {
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 9, // Account discriminator + initialized
+        seeds = [b"seed".as_ref(), signer.key.as_ref()],
+        bump
+    )]
+    pub sol_cerberus_seed: Option<Account<'info, Seed>>,
     pub system_program: Program<'info, System>,
 }
 
 pub fn assign_role(ctx: Context<AssignRole>, assign_role_data: AssignRoleData) -> Result<()> {
     let _ = allowed(
-        &ctx.accounts.authority,
+        &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
         &ctx.accounts.sol_cerberus_rule,
         &ctx.accounts.sol_cerberus_token,
         &ctx.accounts.sol_cerberus_metadata,
+        &mut ctx.accounts.sol_cerberus_seed,
+        &ctx.accounts.system_program,
         AllowedRule {
             app_id: ctx.accounts.sol_cerberus_app.id.key(),
             namespace: Namespaces::AssignRole as u8,

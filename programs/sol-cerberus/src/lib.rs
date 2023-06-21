@@ -67,6 +67,8 @@ pub mod sol_cerberus {
             &ctx.accounts.sol_cerberus_rule,
             &ctx.accounts.sol_cerberus_token,
             &ctx.accounts.sol_cerberus_metadata,
+            &mut ctx.accounts.sol_cerberus_seed,
+            &ctx.accounts.system_program,
             allowed_rule,
         )
     }

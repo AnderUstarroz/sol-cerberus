@@ -31,6 +31,15 @@ export async function rule_pda(
   )[0];
 }
 
+export async function seed_pda(signer: PublicKey) {
+  return (
+    await PublicKey.findProgramAddressSync(
+      [anchor.utils.bytes.utf8.encode("seed"), signer.toBuffer()],
+      PROGRAM.programId
+    )
+  )[0];
+}
+
 /**
  *  Empty Addresses are considered wildcards "*" (role will be applied to all users)
  */

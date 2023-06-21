@@ -1,5 +1,14 @@
 use anchor_lang::prelude::*;
 
+///  Classes:
+///     0 => Trial  (Apps with default fees)
+///     1 => Free   (Apps with no fees)
+#[repr(u8)]
+pub enum Classes {
+    Trial = 0,
+    Free = 1,
+}
+
 #[derive(AnchorSerialize, AnchorDeserialize, Default, Debug)]
 pub struct AppData {
     pub id: Pubkey,
@@ -14,6 +23,9 @@ pub struct UpdateAppData {
     pub recovery: Option<Pubkey>,
     pub name: String,
     pub cached: bool,
+    pub fee: Option<u64>,
+    pub class: u8,
+    pub expires_at: Option<i64>,
 }
 
 #[account]
@@ -26,6 +38,8 @@ pub struct App {
     pub updated_at: i64,
     pub cached: bool,
     pub fee: Option<u64>,
+    pub class: u8,
+    pub expires_at: Option<i64>,
 }
 
 #[event]
@@ -34,4 +48,9 @@ pub struct AppChanged {
     #[index]
     pub app_id: Pubkey,
     pub authority: Pubkey,
+}
+
+#[account]
+pub struct Seed {
+    pub initialized: bool,
 }

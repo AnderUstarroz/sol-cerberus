@@ -42,6 +42,7 @@ describe("3.- Assign roles", () => {
           solCerberusRule: null,
           solCerberusToken: null,
           solCerberusMetadata: null,
+          solCerberusSeed: null,
         })
         .rpc();
       setTimeout(() => {
@@ -78,6 +79,7 @@ describe("3.- Assign roles", () => {
         solCerberusRule: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });
@@ -98,6 +100,7 @@ describe("3.- Assign roles", () => {
         solCerberusRule: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });
@@ -118,6 +121,7 @@ describe("3.- Assign roles", () => {
         solCerberusRule: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });

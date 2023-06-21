@@ -21,5 +21,11 @@ pub enum Errors {
     #[msg("Invalid namespace, must be either an u8 number (0-255) or a wildcard '*'")]
     InvalidNamespace,
     #[msg("SOL_CERBERUS_APP_ID is missing on lib.rs")]
-    SolCerberusAppIdMissing,
+    MissingSolCerberusAppId,
+    #[msg("The Sol Cerberus Seed account is missing")]
+    MissingSeedAccount,
+    #[msg("Only program authority can perform this action")]
+    UnauthorizedProgramAuthority,
+    #[msg("Insufficient funds for transaction")]
+    InsufficientFunds,
 }

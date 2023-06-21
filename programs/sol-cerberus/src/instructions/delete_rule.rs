@@ -1,6 +1,6 @@
 use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 use crate::instructions::allowed::{allowed, AllowedRule};
-use crate::state::app::App;
+use crate::state::app::{App, Seed};
 use crate::state::role::Role;
 use crate::state::rule::*;
 use crate::utils::{utc_now, roles::address_or_wildcard};
@@ -10,7 +10,7 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteRule<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub signer: Signer<'info>,
     #[account(
         mut,
         close = collector,
@@ -42,34 +42,58 @@ pub struct DeleteRule<'info> {
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 9, // Account discriminator + initialized
+        seeds = [b"seed".as_ref(), signer.key.as_ref()],
+        bump
+    )]
+    pub sol_cerberus_seed: Option<Account<'info, Seed>>,
     /// CHECK: collector of the funds
     #[account(mut)]
     collector: AccountInfo<'info>,
-
+    pub system_program: Program<'info, System>,
 }
 
 pub fn delete_rule(
     ctx: Context<DeleteRule>
 ) -> Result<()> {
-    for (n, value) in [
-        [&ctx.accounts.rule.namespace.to_string(), &ctx.accounts.rule.role],  // Checks for Namespace and Role
-        [&ctx.accounts.rule.resource, &ctx.accounts.rule.permission],   // Checks for Resource and Permission
-        ].iter().enumerate() {
-        let _ = allowed(
-            &ctx.accounts.authority,
-            &ctx.accounts.sol_cerberus_app,
-            &ctx.accounts.sol_cerberus_role,
-            if 0 == n { &ctx.accounts.sol_cerberus_rule } else { &ctx.accounts.sol_cerberus_rule2 },
-            &ctx.accounts.sol_cerberus_token,
-            &ctx.accounts.sol_cerberus_metadata,
-            AllowedRule {
-                app_id: ctx.accounts.sol_cerberus_app.id.key(),
-                namespace: if 0 == n { Namespaces::DeleteRuleNSRole as u8 } else { Namespaces::DeleteRuleResourcePerm as u8 },
-                resource: value[0].to_string(),
-                permission: value[1].to_string(),
-            },
-        );
-    }
+      // Checks if is allowed to delete a rule for this specific Namespace and Role.
+      let _ = allowed(
+        &ctx.accounts.signer,
+        &ctx.accounts.sol_cerberus_app,
+        &ctx.accounts.sol_cerberus_role,
+        &ctx.accounts.sol_cerberus_rule,
+        &ctx.accounts.sol_cerberus_token,
+        &ctx.accounts.sol_cerberus_metadata,
+        &mut ctx.accounts.sol_cerberus_seed,
+        &ctx.accounts.system_program,
+        AllowedRule {
+            app_id: ctx.accounts.sol_cerberus_app.id.key(),
+            namespace: Namespaces::DeleteRuleNSRole as u8,
+            resource: ctx.accounts.rule.namespace.to_string(),
+            permission: ctx.accounts.rule.role.to_string(),
+        },
+    )?;
+    // // Checks if is allowed to delete a rule for this specific Resource and Permission.
+    _ = allowed(
+        &ctx.accounts.signer,
+        &ctx.accounts.sol_cerberus_app,
+        &ctx.accounts.sol_cerberus_role,
+        &ctx.accounts.sol_cerberus_rule2,
+        &ctx.accounts.sol_cerberus_token,
+        &ctx.accounts.sol_cerberus_metadata,
+        &mut None,
+        &ctx.accounts.system_program,
+        AllowedRule {
+            app_id: ctx.accounts.sol_cerberus_app.id.key(),
+            namespace: Namespaces::DeleteRuleResourcePerm as u8,
+            resource: ctx.accounts.rule.resource.to_string(),
+            permission: ctx.accounts.rule.permission.to_string(),
+        },
+    )?;
+
     emit!(RulesChanged {
         time: utc_now(),
         app_id: ctx.accounts.sol_cerberus_app.id,

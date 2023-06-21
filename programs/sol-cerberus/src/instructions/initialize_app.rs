@@ -10,9 +10,11 @@ use anchor_lang::prelude::*;
 // + 4 + 16 name (string)
 // + 8 updated_at
 // + 1 cached
-// + 1 + 8 Option<u64>
+// + 1 + 8 Option<u64> updated_at
+// + 1 class
+// + 1 + 8 Option<i64> expires_at
 // + 1 bump
-// total = 8 + 32  + 32 + 1 + 32 + 4 + 16 + 8 + 1 + 1 + 8 + 1 = 144
+// total = 8 + 32  + 32 + 1 + 32 + 4 + 16 + 8 + 1 + 1 + 8 + 1 + 1 + 8 + 1 = 154
 #[derive(Accounts)]
 #[instruction(app_data: AppData)]
 pub struct InitializeApp<'info> {
@@ -21,7 +23,7 @@ pub struct InitializeApp<'info> {
     #[account(
         init,
         payer = authority,
-        space = 1000,
+        space = 154,
         seeds = [b"app".as_ref(), app_data.id.key().as_ref()], 
         bump
     )]
@@ -32,11 +34,14 @@ pub struct InitializeApp<'info> {
 pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<()> {
     let app = &mut ctx.accounts.app;
     app.id = app_data.id;
+    app.class = Classes::Trial as u8;
     app.authority = ctx.accounts.authority.key();
     app.recovery = app_data.recovery;
     app.name = validate_string_len(&app_data.name, 0, 16)?;
+    app.fee = None;
     app.cached = app_data.cached;
     app.updated_at = utc_now();
+    app.expires_at = None;
     app.bump = *ctx.bumps.get("app").unwrap();
     emit!(AppChanged {
         time: app.updated_at,

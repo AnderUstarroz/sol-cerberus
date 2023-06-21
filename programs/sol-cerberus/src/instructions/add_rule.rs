@@ -3,7 +3,7 @@ use crate::instructions::allowed::{allowed, AllowedRule};
 use crate::utils::{valid_rules, utc_now, validate_ns_permission, roles::address_or_wildcard};
 use crate::state::role::Role;
 use anchor_lang::prelude::*;
-use crate::state::app::App;
+use crate::state::app::{App, Seed};
 use crate::state::rule::*;
 use crate::Errors;
 
@@ -21,10 +21,10 @@ use crate::Errors;
 #[instruction(rule_data:RuleData)]
 pub struct AddRule<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub signer: Signer<'info>,
     #[account(
         init,
-        payer = authority,
+        payer = signer,
         space = 111,
         seeds = [rule_data.namespace.to_le_bytes().as_ref(), rule_data.role.as_ref(), rule_data.resource.as_ref(), rule_data.permission.as_ref(), sol_cerberus_app.id.key().as_ref()], 
         constraint = valid_rules(&rule_data.role, &rule_data.resource, &rule_data.permission)  @ Errors::InvalidRule,
@@ -59,6 +59,14 @@ pub struct AddRule<'info> {
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 9, // Account discriminator + initialized
+        seeds = [b"seed".as_ref(), signer.key.as_ref()],
+        bump
+    )]
+    pub sol_cerberus_seed: Option<Account<'info, Seed>>,
     pub system_program: Program<'info, System>,
 }
 
@@ -68,27 +76,31 @@ pub fn add_rule(
 ) -> Result<()> {
     // Checks if is allowed to add a rule for this specific Namespace and Role.
     let _ = allowed(
-        &ctx.accounts.authority,
+        &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
         &ctx.accounts.sol_cerberus_rule,
         &ctx.accounts.sol_cerberus_token,
         &ctx.accounts.sol_cerberus_metadata,
+        &mut ctx.accounts.sol_cerberus_seed,
+        &ctx.accounts.system_program,
         AllowedRule {
             app_id: ctx.accounts.sol_cerberus_app.id.key(),
-            namespace: Namespaces::AddRuleNSRole as u8,  
+            namespace: Namespaces::AddRuleNSRole as u8,
             resource: data.namespace.to_string(),
             permission: data.role.to_string(),
         },
     )?;
     // // Checks if is allowed to add a rule for this specific Resource and Permission.
     _ = allowed(
-        &ctx.accounts.authority,
+        &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
         &ctx.accounts.sol_cerberus_rule2,
         &ctx.accounts.sol_cerberus_token,
         &ctx.accounts.sol_cerberus_metadata,
+        &mut ctx.accounts.sol_cerberus_seed,
+        &ctx.accounts.system_program,
         AllowedRule {
             app_id: ctx.accounts.sol_cerberus_app.id.key(),
             namespace: Namespaces::AddRuleResourcePerm as u8,

@@ -1,26 +1,6 @@
-import {
-  app_pda,
-  role_pda,
-  nft_metadata_pda,
-  WRITE_PERM,
-  rule_pda,
-  READ_PERM,
-} from "./common";
-import {
-  ANOTHER_WALLET,
-  APP_ID,
-  NFTS,
-  PROGRAM,
-  PROVIDER,
-  ALLOWED_WALLET,
-  WALLET_WITH_NFTS,
-  addressType,
-  namespaces,
-} from "./constants";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
-import { burnChecked } from "@solana/spl-token";
+import { app_pda, role_pda, WRITE_PERM, rule_pda, seed_pda } from "./common";
+import { PROGRAM, ALLOWED_WALLET, namespaces } from "./constants";
 import { expect } from "chai";
-import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@metaplex-foundation/js";
 
 describe("6.- Allow add rules", () => {
@@ -29,8 +9,9 @@ describe("6.- Allow add rules", () => {
   let newRulePDA: PublicKey | null = null; // Populated on before() block
   let nsRoleRulePDA: PublicKey | null = null; // Populated on before() block
   let resourcePermRulePDA: PublicKey | null = null; // Populated on before() block
+  let walletSeedPDA = null; // Populated on before() block
   const newResource = "MyNewResource";
-  const newPerm = "Edit";
+  const allPerms = "*";
 
   before(async () => {
     appPDA = await app_pda();
@@ -38,7 +19,7 @@ describe("6.- Allow add rules", () => {
       WRITE_PERM.role,
       ALLOWED_WALLET.publicKey
     );
-    newRulePDA = await rule_pda(WRITE_PERM.role, newResource, newPerm);
+    newRulePDA = await rule_pda(WRITE_PERM.role, newResource, allPerms);
     nsRoleRulePDA = await rule_pda(
       WRITE_PERM.role,
       `${namespaces.Rule}`,
@@ -48,9 +29,10 @@ describe("6.- Allow add rules", () => {
     resourcePermRulePDA = await rule_pda(
       WRITE_PERM.role,
       newResource,
-      newPerm,
+      allPerms,
       namespaces.AddRuleResourcePerm
     );
+    walletSeedPDA = await seed_pda(ALLOWED_WALLET.publicKey);
   });
 
   it("Wallet not allowed to add rule", async () => {
@@ -60,7 +42,7 @@ describe("6.- Allow add rules", () => {
           namespace: namespaces.Rule,
           role: WRITE_PERM.role,
           resource: newResource,
-          permission: newPerm,
+          permission: allPerms,
           expiresAt: null,
         })
         .accounts({
@@ -71,10 +53,12 @@ describe("6.- Allow add rules", () => {
           solCerberusRule2: null,
           solCerberusToken: null,
           solCerberusMetadata: null,
-          authority: ALLOWED_WALLET.publicKey,
+          solCerberusSeed: walletSeedPDA,
+          signer: ALLOWED_WALLET.publicKey,
         })
         .signers([ALLOWED_WALLET])
         .rpc();
+      throw Error("Unauthorized wallets shouldn't be allowed to create rules!");
     } catch (e) {
       if (!e.hasOwnProperty("error")) {
         throw e;
@@ -104,6 +88,7 @@ describe("6.- Allow add rules", () => {
         solCerberusRule2: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });
@@ -111,14 +96,14 @@ describe("6.- Allow add rules", () => {
   it("Add rule to allow creation of Resource and Permission", async () => {
     // Allows the role "Authenticated" to create following permission:
     // - Role:  "Authenticated" (The role receiving the permission)
-    // - Resource: Rule (The kind of namespace of the permission)
-    // - Permission: "Authenticated" (The role to which the permission could be applied)
+    // - Resource:  "MyNewResource" (Resource to which will be applied the permission)
+    // - Permission: "*" (Wildcard, allowed to create any permission on this resource)
     await PROGRAM.methods
       .addRule({
         namespace: namespaces.AddRuleResourcePerm,
         role: WRITE_PERM.role,
         resource: newResource,
-        permission: newPerm,
+        permission: allPerms,
         expiresAt: null,
       })
       .accounts({
@@ -129,29 +114,29 @@ describe("6.- Allow add rules", () => {
         solCerberusRule2: null,
         solCerberusToken: null,
         solCerberusMetadata: null,
+        solCerberusSeed: null,
       })
       .rpc();
   });
 
-  it("Wallet allowed to add rule", async () => {
+  it("Wallet can create rule for allowed resource", async () => {
     // Allows the role "Authenticated" to create following permission:
     // - Role:  "Authenticated" (The role receiving the permission)
-    // - Namespace: Rule (The kind of namespace of the permission)
-    // - Roles of type: "Authenticated" (The role to which the permission could be applied)
-
+    // - Resource:  "MyNewResource" (Resource to which will be applied the permission)
+    // - Permission: "Add"
     await PROGRAM.methods
       .addRule({
         namespace: namespaces.Rule,
         role: WRITE_PERM.role,
         resource: newResource,
-        permission: newPerm,
+        permission: "Add",
         expiresAt: null,
       })
       .accounts({
         rule: await rule_pda(
           WRITE_PERM.role,
           newResource,
-          newPerm,
+          "Add",
           namespaces.Rule
         ),
         solCerberusApp: appPDA,
@@ -160,9 +145,49 @@ describe("6.- Allow add rules", () => {
         solCerberusRule2: resourcePermRulePDA,
         solCerberusToken: null,
         solCerberusMetadata: null,
-        authority: ALLOWED_WALLET.publicKey,
+        solCerberusSeed: walletSeedPDA,
+        signer: ALLOWED_WALLET.publicKey,
       })
       .signers([ALLOWED_WALLET])
       .rpc();
+  });
+
+  it("Wallet cannot create rule for other resources", async () => {
+    try {
+      await PROGRAM.methods
+        .addRule({
+          namespace: namespaces.Rule,
+          role: WRITE_PERM.role,
+          resource: WRITE_PERM.resource,
+          permission: "Add",
+          expiresAt: null,
+        })
+        .accounts({
+          rule: await rule_pda(
+            WRITE_PERM.role,
+            WRITE_PERM.resource,
+            "Add",
+            namespaces.Rule
+          ),
+          solCerberusApp: appPDA,
+          solCerberusRole: allowedWalletRolePDA,
+          solCerberusRule: nsRoleRulePDA,
+          solCerberusRule2: resourcePermRulePDA,
+          solCerberusToken: null,
+          solCerberusMetadata: null,
+          solCerberusSeed: walletSeedPDA,
+          signer: ALLOWED_WALLET.publicKey,
+        })
+        .signers([ALLOWED_WALLET])
+        .rpc();
+      throw Error(
+        "Wallets shouldn't be allowed to create rules on other resources!"
+      );
+    } catch (e) {
+      if (!e.hasOwnProperty("error")) {
+        throw e;
+      }
+      expect(e.error.errorCode.code).to.equal("Unauthorized");
+    }
   });
 });

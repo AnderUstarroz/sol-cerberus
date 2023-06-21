@@ -39,6 +39,11 @@ export enum namespaces {
   DeleteRuleResourcePerm = 6,
 }
 
+export enum classes {
+  Trial = 0,
+  Free = 1,
+}
+
 // @TODO Improve this hack:
 // NFTs are created on Step 0 populating the following object, so they can be reused on all other tests.
 export const NFTS: {
@@ -56,5 +61,7 @@ export const addressType = {
   Nft: { nft: {} },
   Collection: { collection: {} },
 };
+
+export const FEE = 5000;
 
 type AddressKeysType = keyof typeof addressType;

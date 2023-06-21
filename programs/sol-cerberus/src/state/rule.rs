@@ -9,16 +9,14 @@ pub struct RuleData {
     pub expires_at: Option<i64>,
 }
 
-/*
-   Namespaces:
-       0 => Rule (Normal permissions)
-       1 => AssignRole (White list of roles that can be assigned by certain role)
-       2 => DeleteAssignRole (White list of roles that can be deleted by certain role)
-       3 => AddRuleNSRole (White list of namespaces and roles that can be created by certain role)
-       4 => AddRuleResourcePerm (White list of resources and permissions that can be created by certain role)
-       5 => DeleteRuleNSRole (White list of namespaces and roles that can be deleted by certain role)
-       6 => DeleteRuleResourcePerm (White list of resources and permissions that can be deleted by certain role)
-*/
+/// Namespaces:
+///    0 => Rule (Normal permissions)
+///    1 => AssignRole (White list of roles that can be assigned by certain role)
+///    2 => DeleteAssignRole (White list of roles that can be deleted by certain role)
+///    3 => AddRuleNSRole (White list of namespaces and roles that can be created by certain role)
+///    4 => AddRuleResourcePerm (White list of resources and permissions that can be created by certain role)
+///    5 => DeleteRuleNSRole (White list of namespaces and roles that can be deleted by certain role)
+///    6 => DeleteRuleResourcePerm (White list of resources and permissions that can be deleted by certain role)
 #[repr(u8)]
 pub enum Namespaces {
     Rule = 0,

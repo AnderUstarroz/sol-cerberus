@@ -1,6 +1,6 @@
 use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 use crate::instructions::allowed::{allowed, AllowedRule};
-use crate::state::app::App;
+use crate::state::app::{App, Seed};
 use crate::state::rule::Namespaces;
 use crate::state::role::{Role, RolesChanged};
 use crate::utils::{utc_now, roles::address_or_wildcard};
@@ -10,7 +10,7 @@ use crate::state::rule::Rule;
 #[derive(Accounts)]
 pub struct DeleteAssignedRole<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub signer: Signer<'info>,
     #[account(
         mut,
         close = collector,
@@ -37,9 +37,18 @@ pub struct DeleteAssignedRole<'info> {
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 9, // Account discriminator + initialized
+        seeds = [b"seed".as_ref(), signer.key.as_ref()],
+        bump
+    )]
+    pub sol_cerberus_seed: Option<Account<'info, Seed>>,
     /// CHECK: collector of the funds
     #[account(mut)]
     collector: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 
@@ -47,12 +56,14 @@ pub fn delete_assigned_role(
     ctx: Context<DeleteAssignedRole>
 ) -> Result<()> {
     let _ = allowed(
-        &ctx.accounts.authority,
+        &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
         &ctx.accounts.sol_cerberus_rule,
         &ctx.accounts.sol_cerberus_token,
         &ctx.accounts.sol_cerberus_metadata,
+        &mut ctx.accounts.sol_cerberus_seed,
+        &ctx.accounts.system_program,
         AllowedRule {
             app_id: ctx.accounts.sol_cerberus_app.id.key(),
             namespace: Namespaces::DeleteAssignRole as u8,
