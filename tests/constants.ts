@@ -39,8 +39,8 @@ export enum namespaces {
   DeleteRuleResourcePerm = 6,
 }
 
-export enum classes {
-  Trial = 0,
+export enum accountTypes {
+  Basic = 0,
   Free = 1,
 }
 

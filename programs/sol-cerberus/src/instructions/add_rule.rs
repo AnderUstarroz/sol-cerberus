@@ -6,17 +6,18 @@ use anchor_lang::prelude::*;
 use crate::state::app::{App, Seed};
 use crate::state::rule::*;
 use crate::Errors;
+use crate::metadata_program;
 
 // SPACE SIZE:
 // + 8 discriminator
 // + 32 app_id (Pubkey)
-// + 1 type (u8)
+// + 1 namespace (u8)
 // + 4 + 16 role (string)
 // + 4 + 16 resource (string)
-// + 20 permission (string)
+// + 4 + 16  permission (string)
 // + 1 + 8 expires_at Option<i64>
 // + 1 bump
-// total = 8 + 32 + 1 + 4 + 16 + 4 + 16 + 20 + 1 + 8 + 1 = 111
+// total = 8 + 32 + 1 + 4 + 16 + 4 + 16 + 4 + 16  + 1 + 8 + 1 = 111
 #[derive(Accounts)]
 #[instruction(rule_data:RuleData)]
 pub struct AddRule<'info> {
@@ -54,8 +55,8 @@ pub struct AddRule<'info> {
     #[account()]
     pub sol_cerberus_token: Option<Box<Account<'info, TokenAccount>>>,
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-        seeds::program =mpl_token_metadata::ID,
+        seeds = [b"metadata", metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+        seeds::program = metadata_program::ID,
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
@@ -75,7 +76,7 @@ pub fn add_rule(
     data:RuleData
 ) -> Result<()> {
     // Checks if is allowed to add a rule for this specific Namespace and Role.
-    let _ = allowed(
+    allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
@@ -92,7 +93,7 @@ pub fn add_rule(
         },
     )?;
     // // Checks if is allowed to add a rule for this specific Resource and Permission.
-    _ = allowed(
+    allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
@@ -119,7 +120,7 @@ pub fn add_rule(
     // Validate Namespace when creating "AddRuleNSRole", "DeleteRuleNSRole" rules.
     // The allowed namespace must be either an u8 number (0-255) or a wildcard "*"
     if data.namespace == Namespaces::AddRuleNSRole as u8 && data.namespace == Namespaces::DeleteRuleNSRole as u8 {
-        _ = validate_ns_permission(&data.resource)?;
+        validate_ns_permission(&data.resource)?;
     }
 
     // Add permission

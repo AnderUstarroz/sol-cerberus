@@ -1,4 +1,5 @@
 use crate::instructions::allowed::{allowed, AllowedRule};
+use crate::metadata_program;
 use crate::state::app::{App, Seed};
 use crate::state::role::*;
 use crate::state::rule::{Namespaces, Rule};
@@ -10,12 +11,12 @@ use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 // SPACE SIZE:
 // + 8 discriminator
 // + 32 app_id (Pubkey)
-// + 32 address (Pubkey)
-// + 20 role (string)
+// + 1 + 32 address Option<Pubkey>
+// + 4 + 16 role (string)
 // + 1 + 1 address_type
 // + 1 + 8 expires_at Option<i64>
 // + 1 bump
-// total = 8 + 32 + 32 + 20 + 1 + 1 +  1 + 8 + 1 = 104
+// total = 8 + 32 + 1 + 32 + 4 + 16 + 1 + 1 +  1 + 8 + 1 = 105
 #[derive(Accounts)]
 #[instruction(assign_role_data:AssignRoleData)]
 pub struct AssignRole<'info> {
@@ -24,7 +25,7 @@ pub struct AssignRole<'info> {
     #[account(
         init,
         payer = signer,
-        space = 104,
+        space = 105,
         seeds = [assign_role_data.role.as_ref(), address_or_wildcard(&assign_role_data.address), sol_cerberus_app.id.key().as_ref()],
         constraint = valid_rule(&assign_role_data.role, true)  @ InvalidRole,
         bump
@@ -48,8 +49,8 @@ pub struct AssignRole<'info> {
     #[account()]
     pub sol_cerberus_token: Option<Box<Account<'info, TokenAccount>>>,
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-        seeds::program =mpl_token_metadata::ID,
+        seeds = [b"metadata", metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+        seeds::program = metadata_program::ID,
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
@@ -65,7 +66,7 @@ pub struct AssignRole<'info> {
 }
 
 pub fn assign_role(ctx: Context<AssignRole>, assign_role_data: AssignRoleData) -> Result<()> {
-    let _ = allowed(
+    allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,

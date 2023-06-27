@@ -1,6 +1,6 @@
 [package]
 name = "sol-cerberus"
-version = "0.1.8"
+version = "0.1.7"
 description = "A fine grained Role-Based Access Control (RBAC) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
@@ -24,9 +24,19 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-sol-cerberus-macros = { path = "./macros", version = "0.1.5" }
-anchor-lang = { version = "0.27.0", features = ["init-if-needed"] }
-anchor-spl = { version = "0.27.0", features = ["metadata"] }
-solana-program = "1.15.2"
-mpl-token-metadata = { version = "=1.9.1", features = ["no-entrypoint"] }
+sol-cerberus-macros = { path = "./macros", version = "0.1.7" }
+anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }
+anchor-spl = { version = "0.28.0", features = ["metadata"] }
+solana-program = "=1.16.8"
 winnow = "=0.4.1"
+toml_datetime = "=0.6.1"
+
+# Cannot be compiled using Solana 1.16.x until issue is solved: 
+# https://github.com/solana-labs/solana/issues/31960
+# and until mpl-token-metadata crate is updated:
+# https://github.com/coral-xyz/anchor/pull/2527
+
+# Workaround requirements:
+# https://github.com/coral-xyz/anchor/issues/2548#issuecomment-1609418578
+# cargo update -p solana-zk-token-sdk --precise 1.14.19
+# cargo update -p borsh@0.10.3 --precise 0.9.3

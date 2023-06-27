@@ -3,7 +3,7 @@ use crate::state::{App, Seed};
 use crate::state::rule::Rule;
 use crate::utils::{allowed_perm, utc_now, address_or_wildcard, allowed_authority, get_fee, subtract_rent_exemption_from_fee};
 use crate::state::role::Role;
-use crate::constants::TEST_APP_ID;
+use crate::{TEST_APP_ID, metadata_program};
 use anchor_lang::prelude::*;
 use crate::Errors::{Unauthorized, InvalidAppID, MissingSeedAccount};
 
@@ -30,8 +30,8 @@ pub struct Allowed<'info> {
     #[account()]
     pub sol_cerberus_token: Option< Box<Account<'info, TokenAccount>>>,
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-        seeds::program = mpl_token_metadata::ID,
+        seeds = [b"metadata", metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+        seeds::program = metadata_program::ID,
         bump,
     )]
     pub sol_cerberus_metadata: Option< Box<Account<'info, MetadataAccount>>>,

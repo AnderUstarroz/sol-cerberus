@@ -6,5 +6,6 @@ target
 node_modules
 test-ledger
 sol-cerberus.code-workspace
+test_cpi
 programs/test_cpi
 tests/0_testing_macros.ts

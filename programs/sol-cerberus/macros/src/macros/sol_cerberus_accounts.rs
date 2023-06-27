@@ -108,8 +108,8 @@ pub fn sol_cerberus_accounts_macro<'info>(_: TokenStream, item: TokenStream) -> 
         }));
         fields.named.push(parse_field(quote! {
             #[cfg_attr(not(test), account(
-                seeds = [b"metadata", sol_cerberus::mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-                seeds::program = sol_cerberus::mpl_token_metadata::ID,
+                seeds = [b"metadata", sol_cerberus::metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+                seeds::program = sol_cerberus::metadata_program::ID,
                 bump,
             ))]
             pub sol_cerberus_metadata: Option<Box<Account<#lifetime, anchor_spl::metadata::MetadataAccount>>>

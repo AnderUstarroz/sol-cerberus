@@ -1,3 +1,3 @@
-[submodule "deps/metaplex-program-library"]
-	path = deps/metaplex-program-library
-	url = https://github.com/metaplex-foundation/metaplex-program-library
+[submodule "deps/mpl-token-metadata"]
+	path = deps/mpl-token-metadata
+	url = https://github.com/metaplex-foundation/mpl-token-metadata

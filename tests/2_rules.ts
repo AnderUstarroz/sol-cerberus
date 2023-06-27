@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { app_pda, WRITE_PERM, rule_pda, READ_PERM } from "./common";
-import { APP_ID, PROGRAM, PROVIDER } from "./constants";
+import { APP_ID, PROGRAM, PROVIDER, namespaces } from "./constants";
 
 describe("2.- Rules", () => {
   let appPDA = null; // Populated on before() block
@@ -23,7 +23,7 @@ describe("2.- Rules", () => {
       });
       PROGRAM.methods
         .addRule({
-          namespace: 0,
+          namespace: namespaces.Rule,
           role: role1,
           resource: resource1,
           permission: permission1,
@@ -55,7 +55,7 @@ describe("2.- Rules", () => {
     // Add Write rule
     await PROGRAM.methods
       .addRule({
-        namespace: 0,
+        namespace: namespaces.Rule,
         role: WRITE_PERM.role,
         resource: WRITE_PERM.resource,
         permission: WRITE_PERM.permission,
@@ -80,7 +80,7 @@ describe("2.- Rules", () => {
     // Add Read rule
     await PROGRAM.methods
       .addRule({
-        namespace: 0,
+        namespace: namespaces.Rule,
         role: READ_PERM.role,
         resource: READ_PERM.resource,
         permission: READ_PERM.permission,

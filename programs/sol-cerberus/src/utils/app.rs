@@ -51,7 +51,7 @@ pub fn program_authority_field<T: PartialEq>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::state::Classes;
+    use crate::state::AccountTypes;
     use solana_program::pubkey;
 
     #[test]
@@ -72,10 +72,11 @@ mod tests {
             recovery: None, // Only recovery or authority accounts can update the App Authority.
             bump: 0,
             name: "test".to_string(),
-            updated_at: 0,
+            roles_updated_at: 0,
+            rules_updated_at: 0,
             cached: false,
             fee: None,
-            class: Classes::Trial as u8,
+            account_type: AccountTypes::Basic as u8,
             expires_at: None,
         };
         assert_eq!(get_fee(&app), if FEE.is_some() { FEE.unwrap() } else { 0 });

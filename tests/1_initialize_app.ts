@@ -12,7 +12,7 @@ import {
   WALLET_WITH_NFTS,
   ALLOWED_WALLET,
   ANOTHER_WALLET,
-  classes,
+  accountTypes,
 } from "./constants";
 
 describe("1.- Initialize APP", () => {
@@ -117,7 +117,7 @@ describe("1.- Initialize APP", () => {
           name: "myapp-recovered",
           cached: false,
           fee: null,
-          class: classes.Trial,
+          accountType: accountTypes.Basic,
           expiresAt: null,
         })
         .accounts({
@@ -134,6 +134,7 @@ describe("1.- Initialize APP", () => {
         "UnauthorizedAuthorityUpdate"
       );
     }
+
     // Verify current Authority can update the authority of the APP
     await PROGRAM.methods
       .updateApp({
@@ -142,7 +143,7 @@ describe("1.- Initialize APP", () => {
         name: "myapp-recovered1",
         cached: true,
         fee: null,
-        class: classes.Trial,
+        accountType: accountTypes.Basic,
         expiresAt: null,
       })
       .accounts({
@@ -163,7 +164,7 @@ describe("1.- Initialize APP", () => {
         name: "myapp-recovered2",
         cached: false,
         fee: null,
-        class: classes.Trial,
+        accountType: accountTypes.Basic,
         expiresAt: null,
       })
       .accounts({

@@ -15,11 +15,16 @@ pub struct UpdateCache<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn update_cache(ctx: Context<UpdateCache>) -> Result<()> {
+pub fn update_cache(ctx: Context<UpdateCache>, cache_updated: u8) -> Result<()> {
     let app = &mut ctx.accounts.app;
-    app.updated_at = utc_now();
+    let now = utc_now();
+    if cache_updated == CacheUpdated::Roles as u8 {
+        app.roles_updated_at = now;
+    } else {
+        app.rules_updated_at = now;
+    }
     emit!(AppChanged {
-        time: app.updated_at,
+        time: now,
         app_id: ctx.accounts.app.id,
         authority: ctx.accounts.app.authority,
     });

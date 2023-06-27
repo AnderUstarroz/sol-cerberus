@@ -36,7 +36,7 @@ allows access only to the roles which are allowed to access the Resource `Homepa
 ```
 declare_id!("AjO97SU3FWq652tMMzNSbmPMeM4jtKDP3nLJp9APctFA");
 
-pub const SOL_CERBERUS_APP_ID: &'static str = "9R5QMs9rEJ6BMvSF84yw91qnRBXKEBJbeQnZVX84C3";
+const SOL_CERBERUS_APP_ID: Pubkey = pubkey!("9R5QMs9rEJ6BMvSF84yw91qnRBXKEBJbeQnZVX84C3");
 
 #[program]
 pub mod my_program {
@@ -74,7 +74,7 @@ pub mod my_program {
 #[sol_cerberus_accounts]
 #[derive(Accounts)]
 pub struct MyContext<'info> {
-    #[account()]
+    #[account(mut)]
     pub signer: Signer<'info>,
     /// CHECK: Validated on CPI call
     pub sol_cerberus_app: UncheckedAccount<'info>,
@@ -86,7 +86,10 @@ pub struct MyContext<'info> {
     pub sol_cerberus_token: Option<UncheckedAccount<'info>>,
     /// CHECK: Validated on CPI call
     pub sol_cerberus_metadata: Option<UncheckedAccount<'info>>,
+    #[account(mut)]
+    pub sol_cerberus_seed: Option<UncheckedAccount<'info>>,
     pub sol_cerberus: Program<'info, SolCerberus>,
+    pub system_program: Program<'info, System>,
 }
 
 ```

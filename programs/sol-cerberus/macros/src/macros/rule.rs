@@ -59,7 +59,7 @@ pub fn rule_macro(args: TokenStream, item: TokenStream) -> TokenStream {
     let ctx_arg_name: Ident = ctx_arg_name.unwrap();
     // Add the CPI call at the beginning of the function
     let cpi_call: TokenStream2 = quote::quote! {
-        let _ = sol_cerberus::cpi::allowed(
+        sol_cerberus::cpi::allowed(
             #ctx_arg_name.accounts.sol_cerberus_ctx(),
             sol_cerberus::instructions::AllowedRule {
                 app_id: SOL_CERBERUS_APP_ID,
@@ -67,7 +67,7 @@ pub fn rule_macro(args: TokenStream, item: TokenStream) -> TokenStream {
                 resource: #resource.to_string(),
                 permission: #permission.to_string(),
             }
-        );
+        )?;
     };
     // Add the new statement to the beginning of the function block
     let block = &mut item.block;

@@ -5,6 +5,7 @@ use crate::state::role::Role;
 use crate::state::rule::*;
 use crate::utils::{utc_now, roles::address_or_wildcard};
 use anchor_lang::prelude::*;
+use crate::metadata_program;
 
 
 #[derive(Accounts)]
@@ -18,6 +19,10 @@ pub struct DeleteRule<'info> {
         bump = rule.bump,
     )]
     pub rule: Account<'info, Rule>,
+    #[account(
+        seeds = [b"app".as_ref(), sol_cerberus_app.id.key().as_ref()],
+        bump = sol_cerberus_app.bump,
+    )]
     pub sol_cerberus_app: Box<Account<'info, App>>,
     #[account(
         seeds = [sol_cerberus_role.role.as_ref(), address_or_wildcard(&sol_cerberus_role.address), sol_cerberus_role.app_id.key().as_ref()],
@@ -37,8 +42,8 @@ pub struct DeleteRule<'info> {
     #[account()]
     pub sol_cerberus_token: Option<Box<Account<'info, TokenAccount>>>,
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-        seeds::program =mpl_token_metadata::ID,
+        seeds = [b"metadata", metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+        seeds::program =metadata_program::ID,
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
@@ -60,7 +65,7 @@ pub fn delete_rule(
     ctx: Context<DeleteRule>
 ) -> Result<()> {
       // Checks if is allowed to delete a rule for this specific Namespace and Role.
-      let _ = allowed(
+      allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
@@ -77,7 +82,7 @@ pub fn delete_rule(
         },
     )?;
     // // Checks if is allowed to delete a rule for this specific Resource and Permission.
-    _ = allowed(
+    allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,

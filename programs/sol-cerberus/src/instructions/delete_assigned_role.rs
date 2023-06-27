@@ -1,11 +1,12 @@
-use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 use crate::instructions::allowed::{allowed, AllowedRule};
+use crate::metadata_program;
 use crate::state::app::{App, Seed};
-use crate::state::rule::Namespaces;
 use crate::state::role::{Role, RolesChanged};
-use crate::utils::{utc_now, roles::address_or_wildcard};
-use anchor_lang::prelude::*;
+use crate::state::rule::Namespaces;
 use crate::state::rule::Rule;
+use crate::utils::{roles::address_or_wildcard, utc_now};
+use anchor_lang::prelude::*;
+use anchor_spl::{metadata::MetadataAccount, token::TokenAccount};
 
 #[derive(Accounts)]
 pub struct DeleteAssignedRole<'info> {
@@ -14,10 +15,14 @@ pub struct DeleteAssignedRole<'info> {
     #[account(
         mut,
         close = collector,
-        seeds = [role.role.as_ref(), role.address.unwrap().as_ref(), sol_cerberus_app.id.key().as_ref()], 
+        seeds = [role.role.as_ref(), address_or_wildcard(&role.address), sol_cerberus_app.id.key().as_ref()],
         bump = role.bump,
     )]
     pub role: Account<'info, Role>,
+    #[account(
+        seeds = [b"app".as_ref(), sol_cerberus_app.id.key().as_ref()],
+        bump = sol_cerberus_app.bump,
+    )]
     pub sol_cerberus_app: Box<Account<'info, App>>,
     #[account(
         seeds = [sol_cerberus_role.role.as_ref(),  address_or_wildcard(&sol_cerberus_role.address), sol_cerberus_role.app_id.key().as_ref()],
@@ -32,8 +37,8 @@ pub struct DeleteAssignedRole<'info> {
     #[account()]
     pub sol_cerberus_token: Option<Box<Account<'info, TokenAccount>>>,
     #[account(
-        seeds = [b"metadata", mpl_token_metadata::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
-        seeds::program =mpl_token_metadata::ID,
+        seeds = [b"metadata", metadata_program::ID.as_ref(), sol_cerberus_metadata.mint.key().as_ref()],
+        seeds::program =metadata_program::ID,
         bump,
     )]
     pub sol_cerberus_metadata: Option<Box<Account<'info, MetadataAccount>>>,
@@ -51,11 +56,8 @@ pub struct DeleteAssignedRole<'info> {
     pub system_program: Program<'info, System>,
 }
 
-
-pub fn delete_assigned_role(
-    ctx: Context<DeleteAssignedRole>
-) -> Result<()> {
-    let _ = allowed(
+pub fn delete_assigned_role(ctx: Context<DeleteAssignedRole>) -> Result<()> {
+    allowed(
         &ctx.accounts.signer,
         &ctx.accounts.sol_cerberus_app,
         &ctx.accounts.sol_cerberus_role,
@@ -70,7 +72,7 @@ pub fn delete_assigned_role(
             resource: ctx.accounts.role.address_type.to_string(),
             permission: ctx.accounts.role.role.clone(),
         },
-    );
+    )?;
 
     emit!(RolesChanged {
         time: utc_now(),

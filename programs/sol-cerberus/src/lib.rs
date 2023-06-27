@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 pub use constants::*;
 use errors::*;
 use instructions::*;
-pub use mpl_token_metadata;
 pub use sol_cerberus_macros;
 use state::*;
 
@@ -48,11 +47,11 @@ pub mod sol_cerberus {
     }
 
     /**
-     * Updates the app.updated_at field so clients
-     * can keep track and cache permissions.
+     * Updates either app.roles_updated_at or app.rules_updated_at fields, so clients
+     * can keep track and cache roles & rules accordingly.
      */
-    pub fn update_cache(ctx: Context<UpdateCache>) -> Result<()> {
-        instructions::update_cache::update_cache(ctx)
+    pub fn update_cache(ctx: Context<UpdateCache>, cache_updated: u8) -> Result<()> {
+        instructions::update_cache::update_cache(ctx, cache_updated)
     }
 
     /**
