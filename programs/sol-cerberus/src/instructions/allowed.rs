@@ -3,7 +3,7 @@ use crate::state::{App, Seed};
 use crate::state::rule::Rule;
 use crate::utils::{allowed_perm, utc_now, address_or_wildcard, allowed_authority, get_fee, subtract_rent_exemption_from_fee};
 use crate::state::role::Role;
-use crate::{TEST_APP_ID, metadata_program};
+use crate::metadata_program;
 use anchor_lang::prelude::*;
 use crate::Errors::{Unauthorized, InvalidAppID, MissingSeedAccount};
 
@@ -67,10 +67,7 @@ pub fn allowed<'info>(
     allowed_rule: AllowedRule) -> Result<()> {
     // The APP ID must be the one authorized by the program
     if allowed_rule.app_id != app.id.key(){
-        // Ignore APP Check on Test APP
-        if allowed_rule.app_id != TEST_APP_ID{
-            return Err(error!(InvalidAppID))
-        }
+        return Err(error!(InvalidAppID))
     }
     
     // APP Authority is always allowed (No fees)

@@ -1891,7 +1891,7 @@ checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
 
 [[package]]
 name = "sol-cerberus"
-version = "0.1.7"
+version = "0.1.10"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1903,7 +1903,7 @@ dependencies = [
 
 [[package]]
 name = "sol-cerberus-macros"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "proc-macro2",
  "quote",

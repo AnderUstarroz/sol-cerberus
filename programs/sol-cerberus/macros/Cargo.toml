@@ -1,6 +1,6 @@
 [package]
 name = "sol-cerberus-macros"
-version = "0.1.8"
+version = "0.1.9"
 description = "Rust macros to facilitate the integration of Sol Cerberus (RBAC) to Solana Anchor programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
