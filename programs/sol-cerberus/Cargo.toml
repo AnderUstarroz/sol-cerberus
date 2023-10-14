@@ -1,6 +1,6 @@
 [package]
 name = "sol-cerberus"
-version = "0.1.10"
+version = "0.1.11"
 description = "A fine grained Role-Based Access Control (RBAC) for enhanced security on Solana programs"
 edition = "2021"
 authors = ["Ander", "Micael"]
