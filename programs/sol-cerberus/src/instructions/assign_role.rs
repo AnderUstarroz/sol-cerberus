@@ -84,7 +84,7 @@ pub fn assign_role(ctx: Context<AssignRole>, assign_role_data: AssignRoleData) -
     )?;
 
     let role = &mut ctx.accounts.role;
-    role.bump = *ctx.bumps.get("role").unwrap();
+    role.bump = ctx.bumps.role;
     role.app_id = ctx.accounts.sol_cerberus_app.id;
     role.address = assign_role_data.address;
     role.role = assign_role_data.role;

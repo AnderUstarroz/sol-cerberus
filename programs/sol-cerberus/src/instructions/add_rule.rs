@@ -125,7 +125,7 @@ pub fn add_rule(
 
     // Add permission
     let rule = &mut ctx.accounts.rule;
-    rule.bump = *ctx.bumps.get("rule").unwrap();
+    rule.bump = ctx.bumps.rule;
     rule.app_id = ctx.accounts.sol_cerberus_app.id;
     rule.namespace = data.namespace;
     rule.role = data.role;

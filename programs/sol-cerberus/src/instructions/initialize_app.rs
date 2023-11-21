@@ -44,7 +44,7 @@ pub fn initialize_app(ctx: Context<InitializeApp>, app_data: AppData) -> Result<
     app.rules_updated_at = utc_now();
     app.roles_updated_at = app.rules_updated_at;
     app.expires_at = None;
-    app.bump = *ctx.bumps.get("app").unwrap();
+    app.bump = ctx.bumps.app;
     emit!(AppChanged {
         time: app.rules_updated_at,
         app_id: ctx.accounts.app.id,
